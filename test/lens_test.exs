@@ -18,6 +18,24 @@ defmodule LensTest do
     end
   end
 
+  describe "all" do
+    test "to_list", do: assert Lens.to_list([:a, :b, :c], Lens.all) == [:a, :b, :c]
+
+    test "each" do
+      this = self
+      Lens.each([:a, :b, :c], Lens.all, fn x -> send(this, x) end)
+      assert_receive :a
+      assert_receive :b
+      assert_receive :c
+    end
+
+    test "map", do: assert Lens.map([:a, :b, :c], Lens.all, fn :a -> 1; :b -> 2; :c -> 3 end) == [1, 2, 3]
+
+    test "get_and_map" do
+      assert Lens.get_and_map([:a, :b, :c], Lens.all, fn x -> {x, :d} end) == {[:a, :b, :c], [:d, :d, :d]}
+    end
+  end
+
   describe "combine" do
     test "to_list", do: assert Lens.to_list(%{a: %{b: :c}}, Lens.combine(Lens.key(:a), Lens.key(:b))) == [:c]
 
