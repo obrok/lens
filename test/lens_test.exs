@@ -1,5 +1,6 @@
 defmodule LensTest do
   use ExUnit.Case
+  require Integer
   doctest Lens
 
   describe "key" do
@@ -45,7 +46,6 @@ defmodule LensTest do
 
   describe "filter" do
     test "get_and_map" do
-      require Integer
       assert Lens.get_and_map([1, 2, 3, 4], Lens.filter(&Integer.is_odd/1), fn n -> {n, n + 1} end) ==
         {[1, 3], [2, 2, 4, 4]}
     end
@@ -80,6 +80,16 @@ defmodule LensTest do
     test "get_and_map" do
       assert Lens.get_and_map(%{a: 1, b: [2, 3]}, Lens.both(Lens.key(:a), Lens.seq(Lens.key(:b), Lens.all)), fn x -> {x, x + 1} end) ==
         {[1, 2, 3], %{a: 2, b: [3, 4]}}
+    end
+  end
+
+  describe "satisfy" do
+    test "get_and_map" do
+      lens =
+        Lens.both(Lens.keys([:a, :b]), Lens.seq(Lens.key(:c), Lens.all))
+        |> Lens.satisfy(fn n -> Integer.is_odd(n) end)
+      assert Lens.get_and_map(%{a: 1, b: 2, c: [3, 4]}, lens, fn x -> {x, x + 1} end) ==
+        {[1, 3], %{a: 2, b: 2, c: [4, 4]}}
     end
   end
 end

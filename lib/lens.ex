@@ -61,6 +61,20 @@ defmodule Lens do
     end
   end
 
+  def satisfy(lens, filter_fun) do
+    fn data, fun ->
+      {res, changed} = get_and_map(data, lens, fn item ->
+        if filter_fun.(item) do
+          {res, changed} = fun.(item)
+          {[res], changed}
+        else
+          {[], item}
+        end
+      end)
+      {Enum.concat(res), changed}
+    end
+  end
+
   def to_list(data, lens) do
     {list, _} = get_and_map(data, lens, &{&1, &1})
     list
