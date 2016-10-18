@@ -6,15 +6,7 @@ defmodule Lens do
     end
   end
 
-  def all do
-    fn data, fun ->
-      {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
-        {res_item, updated_item} = fun.(item)
-        {[res_item | res], [updated_item | updated]}
-      end)
-      {Enum.reverse(res), Enum.reverse(updated)}
-    end
-  end
+  def all, do: filter(fn _ -> true end)
 
   def seq(lens1, lens2) do
     fn data, fun ->
@@ -33,6 +25,20 @@ defmodule Lens do
 
       {res_parent, changed} = get_and_map(changed, lens1, fun)
       {res_parent ++ Enum.concat(res), changed}
+    end
+  end
+
+  def filter(filter_fun) do
+    fn data, fun ->
+      {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
+        if filter_fun.(item) do
+          {res_item, updated_item} = fun.(item)
+          {[res_item | res], [updated_item | updated]}
+        else
+          {res, [item | updated]}
+        end
+      end)
+      {Enum.reverse(res), Enum.reverse(updated)}
     end
   end
 

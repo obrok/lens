@@ -36,6 +36,14 @@ defmodule LensTest do
     end
   end
 
+  describe "filter" do
+    test "get_and_map" do
+      require Integer
+      assert Lens.get_and_map([1, 2, 3, 4], Lens.filter(&Integer.is_odd/1), fn n -> {n, n + 1} end) ==
+        {[1, 3], [2, 2, 4, 4]}
+    end
+  end
+
   describe "seq" do
     test "to_list", do: assert Lens.to_list(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b))) == [:c]
 
