@@ -16,7 +16,7 @@ defmodule Lens do
     end
   end
 
-  def combine(lens1, lens2) do
+  def seq(lens1, lens2) do
     fn data, fun ->
       {res, changed} = get_and_map(data, lens1, fn item ->
         get_and_map(item, lens2, fun)

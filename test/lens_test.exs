@@ -36,19 +36,19 @@ defmodule LensTest do
     end
   end
 
-  describe "combine" do
-    test "to_list", do: assert Lens.to_list(%{a: %{b: :c}}, Lens.combine(Lens.key(:a), Lens.key(:b))) == [:c]
+  describe "seq" do
+    test "to_list", do: assert Lens.to_list(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b))) == [:c]
 
     test "each" do
       this = self
-      Lens.each(%{a: %{b: :c}}, Lens.combine(Lens.key(:a), Lens.key(:b)), fn x -> send(this, x) end)
+      Lens.each(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b)), fn x -> send(this, x) end)
       assert_receive :c
     end
 
-    test "map", do: assert Lens.map(%{a: %{b: :c}}, Lens.combine(Lens.key(:a), Lens.key(:b)), fn :c -> :d end) == %{a: %{b: :d}}
+    test "map", do: assert Lens.map(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b)), fn :c -> :d end) == %{a: %{b: :d}}
 
     test "get_and_map" do
-      assert Lens.get_and_map(%{a: %{b: :c}}, Lens.combine(Lens.key(:a), Lens.key(:b)), fn :c -> {:d, :e} end) == {[:d], %{a: %{b: :e}}}
+      assert Lens.get_and_map(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b)), fn :c -> {:d, :e} end) == {[:d], %{a: %{b: :e}}}
     end
   end
 end
