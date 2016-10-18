@@ -18,6 +18,13 @@ defmodule LensTest do
     end
   end
 
+  describe "keys" do
+    test "get_and_map" do
+      assert Lens.get_and_map(%{a: :b, c: :d, e: :f}, Lens.keys([:a, :e]), fn x-> {x, :x} end) ==
+        {[:b, :f], %{a: :x, c: :d, e: :x}}
+    end
+  end
+
   describe "all" do
     test "to_list", do: assert Lens.to_list([:a, :b, :c], Lens.all) == [:a, :b, :c]
 

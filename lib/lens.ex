@@ -6,6 +6,17 @@ defmodule Lens do
     end
   end
 
+  def keys(keys) do
+    fn data, fun ->
+      {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
+        {res, changed} = fun.(data[key])
+        {[res | results], Map.put(data, key, changed)}
+      end)
+
+      {Enum.reverse(res), changed}
+    end
+  end
+
   def all, do: filter(fn _ -> true end)
 
   def seq(lens1, lens2) do
