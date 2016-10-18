@@ -25,6 +25,17 @@ defmodule Lens do
     end
   end
 
+  def seq_both(lens1, lens2) do
+    fn data, fun ->
+      {res, changed} = get_and_map(data, lens1, fn item ->
+        get_and_map(item, lens2, fun)
+      end)
+
+      {res_parent, changed} = get_and_map(changed, lens1, fun)
+      {res_parent ++ Enum.concat(res), changed}
+    end
+  end
+
   def to_list(data, lens) do
     {list, _} = get_and_map(data, lens, &{&1, &1})
     list

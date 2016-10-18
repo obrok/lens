@@ -51,4 +51,13 @@ defmodule LensTest do
       assert Lens.get_and_map(%{a: %{b: :c}}, Lens.seq(Lens.key(:a), Lens.key(:b)), fn :c -> {:d, :e} end) == {[:d], %{a: %{b: :e}}}
     end
   end
+
+  describe "seq_both" do
+    test "get_and_map" do
+      assert Lens.get_and_map(%{a: %{b: :c}}, Lens.seq_both(Lens.key(:a), Lens.key(:b)), fn
+        :c -> {2, :d}
+        %{b: :d} -> {1, %{b: :e}}
+      end) == {[1, 2], %{a: %{b: :e}}}
+    end
+  end
 end
