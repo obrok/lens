@@ -18,7 +18,7 @@ data = %{
 }
 ```
 
-Let's say we're interested in all widgets (be they the main widget or other widgets) that are larger than 100.
+Let's say we're interested in the sizes of all widgets (be they the main widget or other widgets) that are larger than 100.
 We can construct a `Lens` object that describes these locations in the datastructure the following way:
 
 ```elixir
@@ -47,7 +47,7 @@ iex> Lens.map(data, lens, &round/1)
   other_widgets: [%{size: 16.5}, %{size: 161}, %{size: 122}]}
 ```
 
-* Use the simultaneously update and return something from every location in the data
+* Simultaneously update and return something from every location in the data
 
 ```elixir
 iex> Lens.get_and_map(data, lens, fn size -> {size, round(size)} end)
