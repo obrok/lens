@@ -39,6 +39,14 @@ defmodule Lens do
     end
   end
 
+  def both(lens1, lens2) do
+    fn data, fun ->
+      {res1, changed1} = get_and_map(data, lens1, fun)
+      {res2, changed2} = get_and_map(changed1, lens2, fun)
+      {res1 ++ res2, changed2}
+    end
+  end
+
   def filter(filter_fun) do
     fn data, fun ->
       {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->

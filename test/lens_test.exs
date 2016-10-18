@@ -75,4 +75,11 @@ defmodule LensTest do
       end) == {[1, 2], %{a: %{b: :e}}}
     end
   end
+
+  describe "both" do
+    test "get_and_map" do
+      assert Lens.get_and_map(%{a: 1, b: [2, 3]}, Lens.both(Lens.key(:a), Lens.seq(Lens.key(:b), Lens.all)), fn x -> {x, x + 1} end) ==
+        {[1, 2, 3], %{a: 2, b: [3, 4]}}
+    end
+  end
 end
