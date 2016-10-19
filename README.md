@@ -16,7 +16,6 @@ data = %{
     %{size: 121.9, subwidgets: []},
   ]
 }
-
 ```
 
 Let's say we're interested in the sizes of all widgets (be they the main widget or other widgets) that are larger than 100.
@@ -27,12 +26,11 @@ lens = Lens.both(
   Lens.key(:main_widget),
   Lens.seq(Lens.key(:other_widgets), Lens.all)
 )
-|> Lens.seq(
+|> Lens.seq_both(
   Lens.recur(Lens.seq(Lens.key(:subwidgets), Lens.all))
 )
 |> Lens.seq(Lens.key(:size))
 |> Lens.satisfy(&(&1 > 100))
-
 ```
 
 Given that we can:
@@ -41,7 +39,7 @@ Given that we can:
 
 ```elixir
 iex> Lens.to_list(data, lens)
-[200.5, 120, 200, 120, 160.5, 121.9]
+[200.5, 160.5, 121.9, 120, 200, 120]
 ```
 
 * Update the described locations in the data structure
@@ -58,7 +56,7 @@ iex> Lens.map(data, lens, &round/1)
 
 ```elixir
 iex> Lens.get_and_map(data, lens, fn size -> {size, round(size)} end)
-{[200.5, 120, 200, 120, 160.5, 121.9],
+{[200.5, 160.5, 121.9, 120, 200, 120],
  %{main_widget: %{size: 201,
      subwidgets: [%{size: 120, subwidgets: [%{size: 200, subwidgets: []}]}]},
    other_widgets: [%{size: 16.5, subwidgets: [%{size: 120, subwidgets: []}]},
