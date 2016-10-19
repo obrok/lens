@@ -30,17 +30,7 @@ defmodule Lens do
 
   def seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
 
-  def recur(lens), do: &recur(lens, &1, &2)
-
-  def recur(lens, data, fun) do
-    {res, changed} = get_and_map(data, lens, fn item ->
-      {results, changed1} = recur(lens, item, fun)
-      {res_parent, changed2} = fun.(changed1)
-      {[res_parent | results], changed2}
-    end)
-
-    {Enum.concat(res), changed}
-  end
+  def recur(lens), do: &do_recur(lens, &1, &2)
 
   def both(lens1, lens2) do
     fn data, fun ->
@@ -94,5 +84,15 @@ defmodule Lens do
 
   def get_and_map(data, lens, fun) do
     lens.(data, fun)
+  end
+
+  defp do_recur(lens, data, fun) do
+    {res, changed} = get_and_map(data, lens, fn item ->
+      {results, changed1} = do_recur(lens, item, fun)
+      {res_parent, changed2} = fun.(changed1)
+      {[res_parent | results], changed2}
+    end)
+
+    {Enum.concat(res), changed}
   end
 end
