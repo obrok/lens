@@ -92,4 +92,29 @@ defmodule LensTest do
         {[1, 3], %{a: 2, b: 2, c: [4, 4]}}
     end
   end
+
+  describe "recur" do
+    test "get_and_map" do
+      data = %{
+        data: 1,
+        items: [
+          %{data: 2, items: []},
+          %{data: 3, items: [
+            %{data: 4, items: []}
+          ]}
+        ]
+      }
+
+      lens = Lens.recur(Lens.seq(Lens.key(:items), Lens.all)) |> Lens.seq(Lens.key(:data))
+
+      assert Lens.get_and_map(data, lens, fn x -> {x, x + 1} end) == {[1, 2, 3, 4], %{
+        data: 2,
+        items: [
+          %{data: 3, items: []},
+          %{data: 4, items: [
+            %{data: 5, items: []}
+          ]}
+        ]}}
+    end
+  end
 end

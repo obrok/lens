@@ -39,6 +39,16 @@ defmodule Lens do
     end
   end
 
+  def recur(lens), do: &recur(lens, &1, &2)
+
+  def recur(lens, data, fun) do
+    {results, changed1} = get_and_map(data, lens, fn item ->
+      recur(lens, item, fun)
+    end)
+    {res_parent, changed2} = fun.(changed1)
+    {[res_parent | Enum.concat(results)], changed2}
+  end
+
   def both(lens1, lens2) do
     fn data, fun ->
       {res1, changed1} = get_and_map(data, lens1, fun)
