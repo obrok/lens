@@ -121,4 +121,16 @@ defmodule LensTest do
   describe "at" do
     assert Lens.get_and_map({1, 2, 3}, Lens.at(1), fn x -> {x, x + 1} end) == {[2], {1, 3, 3}}
   end
+
+  describe "match" do
+    test "get_and_map" do
+      require Lens
+      lens = Lens.seq(Lens.all, Lens.match(fn
+        {:a, _} -> Lens.at(1)
+        {:b, _, _} -> Lens.at(2)
+      end))
+
+      assert Lens.get_and_map([{:a, 1}, {:b, 2, 3}], lens, fn x -> {x, x + 1} end) == {[1, 3], [{:a, 2}, {:b, 2, 4}]}
+    end
+  end
 end

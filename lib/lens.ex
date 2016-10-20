@@ -1,4 +1,10 @@
 defmodule Lens do
+  def match(matcher_fun) do
+    fn data, fun ->
+      get_and_map(data, matcher_fun.(data), fun)
+    end
+  end
+
   def at(index) do
     fn data, fun ->
       {res, updated} = fun.(elem(data, index))
