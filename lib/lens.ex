@@ -1,4 +1,11 @@
 defmodule Lens do
+  def at(index) do
+    fn data, fun ->
+      {res, updated} = fun.(elem(data, index))
+      {[res], put_elem(data, index, updated)}
+    end
+  end
+
   def key(key) do
     fn data, fun ->
       {res, updated} = fun.(data[key])
