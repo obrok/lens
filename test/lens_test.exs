@@ -133,4 +133,10 @@ defmodule LensTest do
       assert Lens.get_and_map([{:a, 1}, {:b, 2, 3}], lens, fn x -> {x, x + 1} end) == {[1, 3], [{:a, 2}, {:b, 2, 4}]}
     end
   end
+
+  describe "empty" do
+    test "get_and_map" do
+      assert Lens.get_and_map({:arbitrary, :data}, Lens.empty, fn -> raise "never_called" end) == {[], {:arbitrary, :data}}
+    end
+  end
 end

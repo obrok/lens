@@ -1,4 +1,8 @@
 defmodule Lens do
+  def empty do
+    fn data, _fun -> {[], data} end
+  end
+
   def match(matcher_fun) do
     fn data, fun ->
       get_and_map(data, matcher_fun.(data), fun)
