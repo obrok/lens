@@ -1,29 +1,31 @@
 defmodule Lens do
-  def empty do
+  use Lens.Macros
+
+  deflens empty do
     fn data, _fun -> {[], data} end
   end
 
-  def match(matcher_fun) do
+  deflens match(matcher_fun) do
     fn data, fun ->
       get_and_map(data, matcher_fun.(data), fun)
     end
   end
 
-  def at(index) do
+  deflens at(index) do
     fn data, fun ->
       {res, updated} = fun.(elem(data, index))
       {[res], put_elem(data, index, updated)}
     end
   end
 
-  def key(key) do
+  deflens key(key) do
     fn data, fun ->
       {res, updated} = fun.(data[key])
       {[res], Map.put(data, key, updated)}
     end
   end
 
-  def keys(keys) do
+  deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
         {res, changed} = fun.(data[key])
@@ -34,9 +36,9 @@ defmodule Lens do
     end
   end
 
-  def all, do: filter(fn _ -> true end)
+  deflens all, do: filter(fn _ -> true end)
 
-  def seq(lens1, lens2) do
+  deflens seq(lens1, lens2) do
     fn data, fun ->
       {res, changed} = get_and_map(data, lens1, fn item ->
         get_and_map(item, lens2, fun)
@@ -45,11 +47,11 @@ defmodule Lens do
     end
   end
 
-  def seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
+  deflens seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
 
-  def recur(lens), do: &do_recur(lens, &1, &2)
+  deflens recur(lens), do: &do_recur(lens, &1, &2)
 
-  def both(lens1, lens2) do
+  deflens both(lens1, lens2) do
     fn data, fun ->
       {res1, changed1} = get_and_map(data, lens1, fun)
       {res2, changed2} = get_and_map(changed1, lens2, fun)
@@ -57,7 +59,7 @@ defmodule Lens do
     end
   end
 
-  def filter(filter_fun) do
+  deflens filter(filter_fun) do
     fn data, fun ->
       {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
         if filter_fun.(item) do
@@ -71,7 +73,7 @@ defmodule Lens do
     end
   end
 
-  def satisfy(lens, filter_fun) do
+  deflens satisfy(lens, filter_fun) do
     fn data, fun ->
       {res, changed} = get_and_map(data, lens, fn item ->
         if filter_fun.(item) do

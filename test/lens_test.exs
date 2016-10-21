@@ -139,4 +139,15 @@ defmodule LensTest do
       assert Lens.get_and_map({:arbitrary, :data}, Lens.empty, fn -> raise "never_called" end) == {[], {:arbitrary, :data}}
     end
   end
+
+  describe "composition with |>" do
+    test "get_and_map" do
+      lens1 = Lens.key(:a) |> Lens.seq(Lens.all) |> Lens.seq(Lens.key(:b))
+      lens2 = Lens.key(:a) |> Lens.all |> Lens.key(:b)
+      data = %{a: [%{b: 1}, %{b: 2}]}
+      fun = fn x -> {x, x + 1} end
+
+      assert Lens.get_and_map(data, lens1, fun) == Lens.get_and_map(data, lens2, fun)
+    end
+  end
 end
