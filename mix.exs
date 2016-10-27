@@ -2,12 +2,16 @@ defmodule Lens.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :lens,
-     version: "0.0.1",
-     elixir: "~> 1.3",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps]
+    [
+      app: :lens,
+      version: "0.0.1",
+      elixir: "~> 1.3",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps,
+      description: description,
+      package: package,
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,5 +32,18 @@ defmodule Lens.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     []
+  end
+
+  defp description do
+    "A utility for working with nested data structures. Implements functional lenses that are Functors (mappable), "
+    <> "Traversable, and Foldable."
+  end
+
+  defp package do
+    [
+      licenses: ["MIT"],
+      maintainers: ["Paweł Obrok"],
+      links: %{"GitHub" => "https://github.com/obrok/lens"},
+    ]
   end
 end
