@@ -157,4 +157,10 @@ defmodule LensTest do
       assert Lens.get_and_map(data, lens1, fun) == Lens.get_and_map(data, lens2, fun)
     end
   end
+
+  describe "root" do
+    test "get_and_map" do
+      assert Lens.get_and_map(1, Lens.root, fn x -> {x, x + 1} end) == {[1], 2}
+    end
+  end
 end

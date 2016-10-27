@@ -5,6 +5,13 @@ defmodule Lens do
     fn data, _fun -> {[], data} end
   end
 
+  deflens root do
+    fn data, fun ->
+      {res, updated} = fun.(data)
+      {[res], updated}
+    end
+  end
+
   deflens match(matcher_fun) do
     fn data, fun ->
       get_and_map(data, matcher_fun.(data), fun)
