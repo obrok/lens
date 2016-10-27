@@ -3,6 +3,10 @@ defmodule LensTest do
   require Integer
   doctest Lens
 
+  defmodule TestStruct do
+    defstruct [:a, :b, :c]
+  end
+
   describe "key" do
     test "to_list", do: assert Lens.to_list(%{a: :b}, Lens.key(:a)) == [:b]
 
@@ -16,6 +20,7 @@ defmodule LensTest do
 
     test "get_and_map" do
       assert Lens.get_and_map(%{a: :b}, Lens.key(:a), fn :b -> {:c, :d} end) == {[:c], %{a: :d}}
+      assert Lens.get_and_map(%TestStruct{a: 1}, Lens.key(:a), fn x -> {x, x + 1} end) == {[1], %TestStruct{a: 2}}
     end
   end
 
@@ -23,6 +28,8 @@ defmodule LensTest do
     test "get_and_map" do
       assert Lens.get_and_map(%{a: :b, c: :d, e: :f}, Lens.keys([:a, :e]), fn x-> {x, :x} end) ==
         {[:b, :f], %{a: :x, c: :d, e: :x}}
+      assert Lens.get_and_map(%TestStruct{a: 1, b: 2, c: 3}, Lens.keys([:a, :c]), fn x -> {x, x + 1} end) ==
+        {[1, 3], %TestStruct{a: 2, b: 2, c: 4}}
     end
   end
 

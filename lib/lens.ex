@@ -20,7 +20,7 @@ defmodule Lens do
 
   deflens key(key) do
     fn data, fun ->
-      {res, updated} = fun.(data[key])
+      {res, updated} = fun.(Map.get(data, key))
       {[res], Map.put(data, key, updated)}
     end
   end
@@ -28,7 +28,7 @@ defmodule Lens do
   deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
-        {res, changed} = fun.(data[key])
+        {res, changed} = fun.(Map.get(data, key))
         {[res | results], Map.put(data, key, changed)}
       end)
 
