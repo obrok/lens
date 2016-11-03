@@ -20,8 +20,8 @@ defmodule Lens do
 
   deflens at(index) do
     fn data, fun ->
-      {res, updated} = fun.(elem(data, index))
-      {[res], put_elem(data, index, updated)}
+      {res, updated} = fun.(data_get_at(data, index))
+      {[res], data_set_at(data, index, updated)}
     end
   end
 
@@ -121,4 +121,13 @@ defmodule Lens do
 
     {Enum.concat(res), changed}
   end
+
+  defp data_get_at(data, index) when is_tuple(data), do: elem(data, index)
+  defp data_get_at(data, index), do: Enum.at(data, index)
+
+  defp data_set_at(data, index, value) when is_tuple(data), do: put_elem(data, index, value)
+  defp data_set_at(data, index, value) when is_list(data) do
+    List.update_at(data, index, fn _ -> value end)
+  end
+
 end
