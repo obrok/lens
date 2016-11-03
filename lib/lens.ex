@@ -27,16 +27,16 @@ defmodule Lens do
 
   deflens key(key) do
     fn data, fun ->
-      {res, updated} = fun.(Map.get(data, key))
-      {[res], Map.put(data, key, updated)}
+      {res, updated} = fun.(access_get(data, key))
+      {[res], access_put(data, key, updated)}
     end
   end
 
   deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
-        {res, changed} = fun.(Map.get(data, key))
-        {[res | results], Map.put(data, key, changed)}
+        {res, changed} = fun.(access_get(data, key))
+        {[res | results], access_put(data, key, changed)}
       end)
 
       {Enum.reverse(res), changed}
@@ -121,4 +121,15 @@ defmodule Lens do
 
     {Enum.concat(res), changed}
   end
+
+  defp access_get(data, key) when is_map(data), do: Map.get(data, key)
+  defp access_get(data, key), do: Access.get(data, key)
+
+  defp access_put(data, key, value) when is_map(data), do: Map.put(data, key, value)
+  defp access_put(data, key, value) do
+    {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
+    updated
+  end
+
 end
+
