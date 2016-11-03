@@ -27,16 +27,16 @@ defmodule Lens do
 
   deflens key(key) do
     fn data, fun ->
-      {res, updated} = fun.(data_get_key(data, key))
-      {[res], data_set_key(data, key, updated)}
+      {res, updated} = fun.(get_at_key(data, key))
+      {[res], set_at_key(data, key, updated)}
     end
   end
 
   deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
-        {res, changed} = fun.(data_get_key(data, key))
-        {[res | results], data_set_key(data, key, changed)}
+        {res, changed} = fun.(get_at_key(data, key))
+        {[res | results], set_at_key(data, key, changed)}
       end)
 
       {Enum.reverse(res), changed}
@@ -122,11 +122,11 @@ defmodule Lens do
     {Enum.concat(res), changed}
   end
 
-  defp data_get_key(data, key) when is_map(data), do: Map.get(data, key)
-  defp data_get_key(data, key), do: Access.get(data, key)
+  defp get_at_key(data, key) when is_map(data), do: Map.get(data, key)
+  defp get_at_key(data, key), do: Access.get(data, key)
 
-  defp data_set_key(data, key, value) when is_map(data), do: Map.put(data, key, value)
-  defp data_set_key(data, key, value) do
+  defp set_at_key(data, key, value) when is_map(data), do: Map.put(data, key, value)
+  defp set_at_key(data, key, value) do
     {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
     updated
   end
