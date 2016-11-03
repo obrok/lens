@@ -126,7 +126,13 @@ defmodule LensTest do
   end
 
   describe "at" do
-    assert Lens.get_and_map({1, 2, 3}, Lens.at(1), fn x -> {x, x + 1} end) == {[2], {1, 3, 3}}
+    test "access on tuple" do
+      assert Lens.get_and_map({1, 2, 3}, Lens.at(1), fn x -> {x, x + 1} end) == {[2], {1, 3, 3}}
+    end
+
+    test "access on list" do
+      assert Lens.get_and_map([1, 2, 3], Lens.at(1), fn x -> {x, x + 1} end) == {[2], [1, 3, 3]}
+    end
   end
 
   describe "match" do
