@@ -14,6 +14,8 @@ defmodule Lens.Macros do
 
     quote do
       def unquote(header), do: unquote(body)
+
+      @doc false
       def unquote(name)(previous, unquote_splicing(args)) do
         Lens.seq(previous, unquote(name)(unquote_splicing(args)))
       end
