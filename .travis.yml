@@ -3,6 +3,12 @@ elixir:
   - 1.3.2
 otp_release:
   - 18.2.1
+env:
+  global:
+    - MIX_HOME=$(pwd)/.mix
 script:
   - mix test
   - mix dialyze
+cache:
+  - .mix
+  - _build
