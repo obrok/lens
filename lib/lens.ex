@@ -1,22 +1,28 @@
 defmodule Lens do
   use Lens.Macros
 
-  @doc ~S"""
-  A lens that always reads as an empty list
+  @opaque t :: function
+
+  @doc """
+  Returns a lens that does not focus on any part of the data.
 
       iex> Lens.empty |> Lens.get(:anything)
       []
   """
+  @spec empty :: t
   deflens empty do
     fn data, _fun -> {[], data} end
   end
 
-  @doc ~S"""
-  Create a lens that returns data as is
+  @doc """
+  Returns a lens that focuses on the whole data.
 
-      iex> Lens.root |> Lens.get(:anything)
-      :anything
+      iex> Lens.to_list(Lens.root, :data)
+      [:data]
+      iex> Lens.map(Lens.root, :data, fn :data -> :other_data end)
+      :other_data
   """
+  @spec root :: t
   deflens root do
     fn data, fun ->
       {res, updated} = fun.(data)
@@ -34,6 +40,7 @@ defmodule Lens do
       iex> Lens.match(selector) |> Lens.get({:b, 2, 3})
       3
   """
+  @spec match((any -> t)) :: t
   deflens match(matcher_fun) do
     fn data, fun ->
       get_and_map(matcher_fun.(data), data, fun)
@@ -46,19 +53,30 @@ defmodule Lens do
       iex> Lens.at(2) |> Lens.get({:a, :b, :c})
       :c
   """
+  @spec at(Integer) :: t
   deflens at(index) do
     fn data, fun ->
-      {res, updated} = fun.(elem(data, index))
-      {[res], put_elem(data, index, updated)}
+      {res, updated} = fun.(get_at_index(data, index))
+      {[res], set_at_index(data, index, updated)}
     end
   end
 
-  @doc ~S"""
-  Access a value at key
+  @doc """
+  Creates a lens that focuses on the value under `key`.
 
-      iex> Lens.key(:foo) |> Lens.get(%{foo: 1})
-      1
+      iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
+      [1]
+      iex> Lens.map(Lens.key(:foo), %{foo: 1, bar: 2}, fn x -> x + 10 end)
+      %{foo: 11, bar: 2}
+
+  If the key doesn't exist in the map a nil will be returned or passed to the update function.
+
+      iex> Lens.to_list(Lens.key(:foo), %{})
+      [nil]
+      iex> Lens.map(Lens.key(:foo), %{}, fn nil -> 3 end)
+      %{foo: 3}
   """
+  @spec key(any) :: t
   deflens key(key) do
     fn data, fun ->
       {res, updated} = fun.(Map.get(data, key))
@@ -72,6 +90,7 @@ defmodule Lens do
       iex> Lens.keys([:a, :c]) |> Lens.get(%{a: 1, b: 2, c: 3})
       [1, 3]
   """
+  @spec keys(nonempty_list(any)) :: t
   deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
@@ -89,6 +108,7 @@ defmodule Lens do
       iex> Lens.all |> Lens.get([1, 2, 3])
       [1, 2, 3]
   """
+  @spec all :: t
   deflens all, do: filter(fn _ -> true end)
 
   @doc """
@@ -102,6 +122,7 @@ defmodule Lens do
       iex> Lens.key(:a) |> Lens.key(:b) |> Lens.get(%{a: %{b: 3}})
       3
   """
+  @spec seq(t, t) :: t
   deflens seq(lens1, lens2) do
     fn data, fun ->
       {res, changed} = get_and_map(lens1, data, fn item ->
@@ -117,6 +138,7 @@ defmodule Lens do
       iex> Lens.seq_both(Lens.key(:a), Lens.key(:b)) |> Lens.get(%{a: %{b: :c}})
       [:c, %{b: :c}]
   """
+  @spec seq_both(t, t) :: t
   deflens seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
 
   @doc ~S"""
@@ -133,6 +155,7 @@ defmodule Lens do
       iex> Lens.get(lens, data)
       [1, 2, 3]
   """
+  @spec recur(t) :: t
   deflens recur(lens), do: &do_recur(lens, &1, &2)
 
   @doc ~S"""
@@ -141,6 +164,7 @@ defmodule Lens do
       iex> Lens.both(Lens.key(:a), Lens.key(:b) |> Lens.all) |> Lens.get(%{a: 1, b: [2, 3]})
       [1, 2, 3]
   """
+  @spec both(t, t) :: t
   deflens both(lens1, lens2) do
     fn data, fun ->
       {res1, changed1} = get_and_map(lens1, data, fun)
@@ -155,6 +179,7 @@ defmodule Lens do
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.get([1, 2, 3, 4])
       [1, 3]
   """
+  @spec filter((any -> boolean)) :: t
   deflens filter(filter_fun) do
     fn data, fun ->
       {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
@@ -175,6 +200,7 @@ defmodule Lens do
       iex> Lens.both(Lens.key(:a), Lens.key(:b)) |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2})
       1
   """
+  @spec satisfy(t, (any -> boolean)) :: t
   deflens satisfy(lens, filter_fun) do
     fn data, fun ->
       {res, changed} = get_and_map(lens, data, fn item ->
@@ -195,6 +221,7 @@ defmodule Lens do
       iex> Lens.keys([:a, :c]) |> Lens.to_list(%{a: 1, b: 2, c: 3})
       [1, 3]
   """
+  @spec to_list(t, any) :: list(any)
   def to_list(lens, data) do
     {list, _} = get_and_map(lens, data, &{&1, &1})
     list
@@ -209,6 +236,7 @@ defmodule Lens do
       iex> capture_io(fun)
       "1\n3\n"
   """
+  @spec each(t, any, (any -> any)) :: :ok
   def each(lens, data, fun) do
     {_, _} = get_and_map(lens, data, &{nil, fun.(&1)})
     :ok
@@ -221,6 +249,7 @@ defmodule Lens do
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.map(data, fn v -> v + 10 end)
       [11, 2, 13, 4]
   """
+  @spec map(t, any, (any -> any)) :: any
   def map(lens, data, fun) do
     {_, changed} = get_and_map(lens, data, &{nil, fun.(&1)})
     changed
@@ -235,6 +264,7 @@ defmodule Lens do
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.get_and_map(data, fn v -> {v, v + 10} end)
       {[1, 3], [11, 2, 13]}
   """
+  @spec get_and_map(t, any, (any -> {any, any})) :: {list(any), any}
   def get_and_map(lens, data, fun) do
     lens.(data, fun)
   end
@@ -242,6 +272,7 @@ defmodule Lens do
   @doc ~S"""
   Executes `to_list` and returns the first item if the list has only one item otherwise the full list.
   """
+  @spec get(t, any) :: any
   def get(lens, data) do
     to_list(lens, data) |> fn [x] -> x; x -> x end.()
   end
@@ -256,4 +287,13 @@ defmodule Lens do
 
     {Enum.concat(res), changed}
   end
+
+  defp get_at_index(data, index) when is_tuple(data), do: elem(data, index)
+  defp get_at_index(data, index), do: Enum.at(data, index)
+
+  defp set_at_index(data, index, value) when is_tuple(data), do: put_elem(data, index, value)
+  defp set_at_index(data, index, value) when is_list(data) do
+    List.update_at(data, index, fn _ -> value end)
+  end
+
 end
