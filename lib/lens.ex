@@ -1,7 +1,7 @@
 defmodule Lens do
   use Lens.Macros
 
-  @opaque t :: function
+  @opaque t :: (:get, any, function -> list(any)) | (:get_and_update, any, function -> {list(any), any})
 
   @doc """
   Returns a lens that does not focus on any part of the data.
@@ -109,7 +109,7 @@ defmodule Lens do
       [1, 2, 3]
   """
   @spec all :: t
-  deflens all, do: filter(fn _ -> true end)
+  deflens all, do: wrap filter(fn _ -> true end)
 
   @doc """
   Compose a pair of lens by applying the second to the result of the first
@@ -139,7 +139,7 @@ defmodule Lens do
       [:c, %{b: :c}]
   """
   @spec seq_both(t, t) :: t
-  deflens seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
+  deflens seq_both(lens1, lens2), do: wrap Lens.both(Lens.seq(lens1, lens2), lens1)
 
   @doc ~S"""
   Make a lens recursive
@@ -222,10 +222,7 @@ defmodule Lens do
       [1, 3]
   """
   @spec to_list(t, any) :: list(any)
-  def to_list(lens, data) do
-    {list, _} = get_and_map(lens, data, &{&1, &1})
-    list
-  end
+  def to_list(lens, data), do: get_in(data, [lens])
 
   @doc ~S"""
   Perform a side effect on each value from a lens
@@ -237,10 +234,7 @@ defmodule Lens do
       "1\n3\n"
   """
   @spec each(t, any, (any -> any)) :: :ok
-  def each(lens, data, fun) do
-    {_, _} = get_and_map(lens, data, &{nil, fun.(&1)})
-    :ok
-  end
+  def each(lens, data, fun), do: to_list(lens, data) |> Enum.each(fun)
 
   @doc ~S"""
   Obtain the updated version of data by applying fun on lens.
@@ -250,10 +244,7 @@ defmodule Lens do
       [11, 2, 13, 4]
   """
   @spec map(t, any, (any -> any)) :: any
-  def map(lens, data, fun) do
-    {_, changed} = get_and_map(lens, data, &{nil, fun.(&1)})
-    changed
-  end
+  def map(lens, data, fun), do: update_in(data, [lens], fun)
 
   @doc ~S"""
   Get a tuple of original values and the updated data by applying fun on lens.
@@ -265,18 +256,15 @@ defmodule Lens do
       {[1, 3], [11, 2, 13]}
   """
   @spec get_and_map(t, any, (any -> {any, any})) :: {list(any), any}
-  def get_and_map(lens, data, fun) do
-    lens.(data, fun)
-  end
+  def get_and_map(lens, data, fun), do: get_and_update_in(data, [lens], fun)
 
   @doc ~S"""
   Executes `to_list` and returns the first item if the list has only one item otherwise the full list.
   """
   @spec get(t, any) :: any
-  def get(lens, data) do
-    to_list(lens, data) |> fn [x] -> x; x -> x end.()
-  end
+  def get(lens, data), do: to_list(lens, data) |> fn [x] -> x; x -> x end.()
 
+  defp wrap(lens), do: &get_and_update_in(&1, [lens], &2)
 
   defp do_recur(lens, data, fun) do
     {res, changed} = get_and_map(lens, data, fn item ->

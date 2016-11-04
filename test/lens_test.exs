@@ -168,4 +168,20 @@ defmodule LensTest do
       assert Lens.get_and_map(Lens.root, 1, fn x -> {x, x + 1} end) == {[1], 2}
     end
   end
+
+  describe "lens as access key" do
+    test "Kernel.get_in" do
+      value = %{a: 1, b: 2, c: 3}
+      |> get_in([Lens.keys([:a, :c])])
+      |> Enum.map(&to_string/1)
+
+      assert value == ["1", "3"]
+    end
+
+    test "Kernel.update_in" do
+      value = %{a: 1, b: 2, c: 3}
+      |> update_in([Lens.keys([:a, :c])], fn x -> x * 4 end)
+      assert value == %{a: 4, b: 2, c: 12}
+    end
+  end
 end
