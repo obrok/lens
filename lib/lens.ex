@@ -1,10 +1,28 @@
 defmodule Lens do
   use Lens.Macros
 
+  @opaque t :: function
+
+  @doc """
+  Returns a lens that does not focus on any part of the data.
+
+      iex> Lens.to_list([:anything], Lens.empty)
+      []
+  """
+  @spec empty :: t
   deflens empty do
     fn data, _fun -> {[], data} end
   end
 
+  @doc """
+  Returns a lens that focuses on the whole data.
+
+      iex> Lens.to_list(:data, Lens.root)
+      [:data]
+      iex> Lens.map(:data, Lens.root, fn :data -> :other_data end)
+      :other_data
+  """
+  @spec root :: t
   deflens root do
     fn data, fun ->
       {res, updated} = fun.(data)
@@ -20,11 +38,27 @@ defmodule Lens do
 
   deflens at(index) do
     fn data, fun ->
-      {res, updated} = fun.(elem(data, index))
-      {[res], put_elem(data, index, updated)}
+      {res, updated} = fun.(get_at_index(data, index))
+      {[res], set_at_index(data, index, updated)}
     end
   end
 
+  @doc """
+  Creates a lens that assumes the data is a map and focuses on the value under `key`.
+
+      iex> Lens.to_list(%{foo: 1, bar: 2}, Lens.key(:foo))
+      [1]
+      iex> Lens.map(%{foo: 1, bar: 2}, Lens.key(:foo), fn x -> x + 10 end)
+      %{foo: 11, bar: 2}
+
+  If the key doesn't exist in the map a nil will be returned or passed to the update function.
+
+      iex> Lens.to_list(%{}, Lens.key(:foo))
+      [nil]
+      iex> Lens.map(%{}, Lens.key(:foo), fn nil -> 3 end)
+      %{foo: 3}
+  """
+  @spec key(any) :: t
   deflens key(key) do
     fn data, fun ->
       {res, updated} = fun.(get_at_key(data, key))
@@ -129,6 +163,14 @@ defmodule Lens do
   defp set_at_key(data, key, value) do
     {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
     updated
+  end
+
+  defp get_at_index(data, index) when is_tuple(data), do: elem(data, index)
+  defp get_at_index(data, index), do: Enum.at(data, index)
+
+  defp set_at_index(data, index, value) when is_tuple(data), do: put_elem(data, index, value)
+  defp set_at_index(data, index, value) when is_list(data) do
+    List.update_at(data, index, fn _ -> value end)
   end
 
 end
