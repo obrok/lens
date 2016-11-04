@@ -79,8 +79,8 @@ defmodule Lens do
   @spec key(any) :: t
   deflens key(key) do
     fn data, fun ->
-      {res, updated} = fun.(Map.get(data, key))
-      {[res], Map.put(data, key, updated)}
+      {res, updated} = fun.(get_at_key(data, key))
+      {[res], set_at_key(data, key, updated)}
     end
   end
 
@@ -94,8 +94,8 @@ defmodule Lens do
   deflens keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
-        {res, changed} = fun.(Map.get(data, key))
-        {[res | results], Map.put(data, key, changed)}
+        {res, changed} = fun.(get_at_key(data, key))
+        {[res | results], set_at_key(data, key, changed)}
       end)
 
       {Enum.reverse(res), changed}
@@ -276,6 +276,15 @@ defmodule Lens do
     {Enum.concat(res), changed}
   end
 
+  defp get_at_key(data, key) when is_map(data), do: Map.get(data, key)
+  defp get_at_key(data, key), do: Access.get(data, key)
+
+  defp set_at_key(data, key, value) when is_map(data), do: Map.put(data, key, value)
+  defp set_at_key(data, key, value) do
+    {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
+    updated
+  end
+
   defp get_at_index(data, index) when is_tuple(data), do: elem(data, index)
   defp get_at_index(data, index), do: Enum.at(data, index)
 
@@ -285,3 +294,4 @@ defmodule Lens do
   end
 
 end
+

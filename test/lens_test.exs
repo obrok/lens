@@ -10,6 +10,8 @@ defmodule LensTest do
   describe "key" do
     test "to_list", do: assert Lens.to_list(Lens.key(:a), %{a: :b}) == [:b]
 
+    test "to_list on keyword", do: assert Lens.to_list(Lens.key(:a), [a: :b]) == [:b]
+
     test "each" do
       this = self
       Lens.each(Lens.key(:a), %{a: :b}, fn x -> send(this, x) end)
@@ -17,6 +19,7 @@ defmodule LensTest do
     end
 
     test "map", do: assert Lens.map(Lens.key(:a), %{a: :b}, fn :b -> :c end) == %{a: :c}
+    test "map on keyword", do: assert Lens.map(Lens.key(:a), [a: :b], fn :b -> :c end) == [a: :c]
 
     test "get_and_map" do
       assert Lens.get_and_map(Lens.key(:a), %{a: :b}, fn :b -> {:c, :d} end) == {[:c], %{a: :d}}
