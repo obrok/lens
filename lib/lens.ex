@@ -3,7 +3,7 @@ defmodule Lens do
 
   @opaque t :: (:get, any, function -> list(any)) | (:get_and_update, any, function -> {list(any), any})
 
-  @doc """
+  @doc ~S"""
   Returns a lens that does not focus on any part of the data.
 
       iex> Lens.empty |> Lens.get(:anything)
@@ -14,7 +14,7 @@ defmodule Lens do
     fn data, _fun -> {[], data} end
   end
 
-  @doc """
+  @doc ~S"""
   Returns a lens that focuses on the whole data.
 
       iex> Lens.to_list(Lens.root, :data)
@@ -111,7 +111,7 @@ defmodule Lens do
   @spec all :: t
   deflens all, do: wrap filter(fn _ -> true end)
 
-  @doc """
+  @doc ~S"""
   Compose a pair of lens by applying the second to the result of the first
 
       iex> Lens.seq(Lens.key(:a), Lens.key(:b)) |> Lens.get(%{a: %{b: 3}})
@@ -247,13 +247,15 @@ defmodule Lens do
   def map(lens, data, fun), do: update_in(data, [lens], fun)
 
   @doc ~S"""
-  Get a tuple of original values and the updated data by applying fun on lens.
+  Get and update values inside data on a single pass as specified by the mapping function.
 
-  The mapping function takes a value and must return a tuple with old and update values.
+  The mapping function takes a each value form the lens and must return a tuple `{value_to_return, value_to_update_on_data}`
 
-      iex> data = [1, 2, 3]
-      iex> Lens.filter(&Integer.is_odd/1) |> Lens.get_and_map(data, fn v -> {v, v + 10} end)
-      {[1, 3], [11, 2, 13]}
+      iex> data = %{a: 1, b: 2, c: 3}
+      iex> Lens.keys([:a, :b, :c])
+      ...> |> Lens.satisfy(&Integer.is_odd/1)
+      ...> |> Lens.get_and_map(data, fn v -> {v + 1, v + 10} end)
+      {[2, 4], %{a: 11, b: 2, c: 13}}
   """
   @spec get_and_map(t, any, (any -> {any, any})) :: {list(any), any}
   def get_and_map(lens, data, fun), do: get_and_update_in(data, [lens], fun)
