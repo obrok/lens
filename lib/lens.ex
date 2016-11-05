@@ -61,7 +61,7 @@ defmodule Lens do
     end
   end
 
-  @doc """
+  @doc ~S"""
   Creates a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
@@ -292,6 +292,4 @@ defmodule Lens do
   defp set_at_index(data, index, value) when is_list(data) do
     List.update_at(data, index, fn _ -> value end)
   end
-
 end
-
