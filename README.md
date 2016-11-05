@@ -41,14 +41,14 @@ Given that we can:
 * Extract all the relevant data
 
 ```elixir
-iex> Lens.to_list(data, lens)
+iex> Lens.to_list(lens, data)
 [200.5, 160.5, 121.9, 120, 200, 120]
 ```
 
 * Update the described locations in the data structure
 
 ```elixir
-iex> Lens.map(data, lens, &round/1)
+iex> Lens.map(lens, data, &round/1)
 %{main_widget: %{size: 201,
     subwidgets: [%{size: 120, subwidgets: [%{size: 200, subwidgets: []}]}]},
   other_widgets: [%{size: 16.5, subwidgets: [%{size: 120, subwidgets: []}]},
@@ -58,12 +58,23 @@ iex> Lens.map(data, lens, &round/1)
 * Simultaneously update and return something from every location in the data
 
 ```elixir
-iex> Lens.get_and_map(data, lens, fn size -> {size, round(size)} end)
+iex> Lens.get_and_map(lens, data, fn size -> {size, round(size)} end)
 {[200.5, 160.5, 121.9, 120, 200, 120],
  %{main_widget: %{size: 201,
      subwidgets: [%{size: 120, subwidgets: [%{size: 200, subwidgets: []}]}]},
    other_widgets: [%{size: 16.5, subwidgets: [%{size: 120, subwidgets: []}]},
     %{size: 161, subwidgets: []}, %{size: 122, subwidgets: []}]}}
+```
+
+Lenses are also compatible with `Access` and associated `Kernel` functions:
+
+```elixir
+iex> get_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)])
+[1, 3]
+iex> update_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)], fn x -> x + 1 end)
+[2, 2, 4]
+iex> get_and_update_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)], fn x -> {x - 1, x + 1} end)
+{[0, 2], [2, 2, 4]}
 ```
 
 ## Installation
