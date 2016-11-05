@@ -11,6 +11,7 @@ defmodule Lens.Mixfile do
       deps: deps,
       description: description,
       package: package,
+      docs: docs,
     ]
   end
 
@@ -47,6 +48,13 @@ defmodule Lens.Mixfile do
       licenses: ["MIT"],
       maintainers: ["Paweł Obrok"],
       links: %{"GitHub" => "https://github.com/obrok/lens"},
+    ]
+  end
+
+  defp docs do
+    [
+      main: "README",
+      extras: ["README.md"],
     ]
   end
 end
