@@ -13,7 +13,16 @@ defmodule Lens.Macros do
     end
 
     quote do
-      def unquote(header), do: unquote(body)
+      def unquote(header) do
+        lens = unquote(body)
+        fn
+          :get, data, next ->
+            {list, _} = lens.(data, &{&1, &1})
+            next.(list)
+          :get_and_update, data, mapper ->
+            lens.(data, mapper)
+        end
+      end
 
       @doc false
       def unquote(name)(previous, unquote_splicing(args)) do
