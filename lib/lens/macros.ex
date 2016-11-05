@@ -6,6 +6,16 @@ defmodule Lens.Macros do
     end
   end
 
+  @doc ~S"""
+  A convenience to define a lens that can be piped into with `|>`.
+
+      deflens some_lens(foo, bar), do: some_lens_combination(foo, bar)
+
+  Is equivalent to:
+
+      def some_lens(foo, bar), do: some_lens_combination(foo, bar)
+      def some_lens(previous, foo, bar), do: Lens.seq(previous, some_lens_combination(foo, bar))
+  """
   defmacro deflens(header = {name, _, args}, do: body) do
     args = case args do
       nil -> []
@@ -22,6 +32,7 @@ defmodule Lens.Macros do
     end
   end
 
+  @doc false
   defmacro deflens_raw(header = {name, _, args}, do: body) do
     args = case args do
       nil -> []
