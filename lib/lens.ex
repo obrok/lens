@@ -10,7 +10,7 @@ defmodule Lens do
       []
   """
   @spec empty :: t
-  deflens empty do
+  deflens_raw empty do
     fn data, _fun -> {[], data} end
   end
 
@@ -23,7 +23,7 @@ defmodule Lens do
       :other_data
   """
   @spec root :: t
-  deflens root do
+  deflens_raw root do
     fn data, fun ->
       {res, updated} = fun.(data)
       {[res], updated}
@@ -41,7 +41,7 @@ defmodule Lens do
       3
   """
   @spec match((any -> t)) :: t
-  deflens match(matcher_fun) do
+  deflens_raw match(matcher_fun) do
     fn data, fun ->
       get_and_map(matcher_fun.(data), data, fun)
     end
@@ -54,7 +54,7 @@ defmodule Lens do
       :c
   """
   @spec at(Integer) :: t
-  deflens at(index) do
+  deflens_raw at(index) do
     fn data, fun ->
       {res, updated} = fun.(get_at_index(data, index))
       {[res], set_at_index(data, index, updated)}
@@ -77,7 +77,7 @@ defmodule Lens do
       %{foo: 3}
   """
   @spec key(any) :: t
-  deflens key(key) do
+  deflens_raw key(key) do
     fn data, fun ->
       {res, updated} = fun.(get_at_key(data, key))
       {[res], set_at_key(data, key, updated)}
@@ -91,7 +91,7 @@ defmodule Lens do
       [1, 3]
   """
   @spec keys(nonempty_list(any)) :: t
-  deflens keys(keys) do
+  deflens_raw keys(keys) do
     fn data, fun ->
       {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
         {res, changed} = fun.(get_at_key(data, key))
@@ -109,7 +109,7 @@ defmodule Lens do
       [1, 2, 3]
   """
   @spec all :: t
-  deflens all, do: wrap filter(fn _ -> true end)
+  deflens all, do: filter(fn _ -> true end)
 
   @doc ~S"""
   Compose a pair of lens by applying the second to the result of the first
@@ -123,7 +123,7 @@ defmodule Lens do
       3
   """
   @spec seq(t, t) :: t
-  deflens seq(lens1, lens2) do
+  deflens_raw seq(lens1, lens2) do
     fn data, fun ->
       {res, changed} = get_and_map(lens1, data, fn item ->
         get_and_map(lens2, item, fun)
@@ -139,7 +139,7 @@ defmodule Lens do
       [:c, %{b: :c}]
   """
   @spec seq_both(t, t) :: t
-  deflens seq_both(lens1, lens2), do: wrap Lens.both(Lens.seq(lens1, lens2), lens1)
+  deflens seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
 
   @doc ~S"""
   Make a lens recursive
@@ -156,7 +156,7 @@ defmodule Lens do
       [1, 2, 3]
   """
   @spec recur(t) :: t
-  deflens recur(lens), do: &do_recur(lens, &1, &2)
+  deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
   @doc ~S"""
   Combine two lenses accessing both of them as one
@@ -165,7 +165,7 @@ defmodule Lens do
       [1, 2, 3]
   """
   @spec both(t, t) :: t
-  deflens both(lens1, lens2) do
+  deflens_raw both(lens1, lens2) do
     fn data, fun ->
       {res1, changed1} = get_and_map(lens1, data, fun)
       {res2, changed2} = get_and_map(lens2, changed1, fun)
@@ -180,7 +180,7 @@ defmodule Lens do
       [1, 3]
   """
   @spec filter((any -> boolean)) :: t
-  deflens filter(filter_fun) do
+  deflens_raw filter(filter_fun) do
     fn data, fun ->
       {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
         if filter_fun.(item) do
@@ -201,7 +201,7 @@ defmodule Lens do
       1
   """
   @spec satisfy(t, (any -> boolean)) :: t
-  deflens satisfy(lens, filter_fun) do
+  deflens_raw satisfy(lens, filter_fun) do
     fn data, fun ->
       {res, changed} = get_and_map(lens, data, fn item ->
         if filter_fun.(item) do
@@ -265,8 +265,6 @@ defmodule Lens do
   """
   @spec get(t, any) :: any
   def get(lens, data), do: to_list(lens, data) |> fn [x] -> x; x -> x end.()
-
-  defp wrap(lens), do: &get_and_update_in(&1, [lens], &2)
 
   defp do_recur(lens, data, fun) do
     {res, changed} = get_and_map(lens, data, fn item ->

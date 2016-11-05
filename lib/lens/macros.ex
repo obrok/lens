@@ -13,6 +13,22 @@ defmodule Lens.Macros do
     end
 
     quote do
+      def unquote(header), do: unquote(body)
+
+      @doc false
+      def unquote(name)(previous, unquote_splicing(args)) do
+        Lens.seq(previous, unquote(name)(unquote_splicing(args)))
+      end
+    end
+  end
+
+  defmacro deflens_raw(header = {name, _, args}, do: body) do
+    args = case args do
+      nil -> []
+      _ -> args
+    end
+
+    quote do
       def unquote(header) do
         lens = unquote(body)
         fn
