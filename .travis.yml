@@ -10,5 +10,6 @@ script:
   - mix test
   - mix dialyze
 cache:
+  directories:
   - .mix
   - _build
