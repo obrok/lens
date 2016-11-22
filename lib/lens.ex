@@ -119,6 +119,20 @@ defmodule Lens do
     keys |> Enum.map(&Lens.key/1) |> Enum.reverse |> Enum.reduce(Lens.empty, &Lens.both/2)
 
   @doc ~S"""
+  Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, an error is raised.
+
+      iex> Lens.keys!([:a, :c]) |> Lens.get(%{a: 1, b: 2, c: 3})
+      [1, 3]
+      iex> Lens.keys!([:a, :c]) |> Lens.map([a: 1, b: 2, c: 3], &(&1 + 1))
+      [a: 2, b: 2, c: 4]
+      iex> Lens.keys!([:a, :c]) |> Lens.get(%{a: 1, b: 2})
+      ** (KeyError) key :c not found in: %{a: 1, b: 2}
+  """
+  @spec keys!(nonempty_list(any)) :: t
+  deflens keys!(keys), do:
+    keys |> Enum.map(&Lens.key!/1) |> Enum.reverse |> Enum.reduce(Lens.empty, &Lens.both/2)
+
+  @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
 
       iex> Lens.all |> Lens.get([1, 2, 3])
