@@ -115,16 +115,8 @@ defmodule Lens do
       [a: 2, b: 2, c: 4]
   """
   @spec keys(nonempty_list(any)) :: t
-  deflens_raw keys(keys) do
-    fn data, fun ->
-      {res, changed} = Enum.reduce(keys, {[], data}, fn key, {results, data} ->
-        {res, changed} = fun.(get_at_key(data, key))
-        {[res | results], set_at_key(data, key, changed)}
-      end)
-
-      {Enum.reverse(res), changed}
-    end
-  end
+  deflens keys(keys), do:
+    keys |> Enum.map(&Lens.key/1) |> Enum.reverse |> Enum.reduce(Lens.empty, &Lens.both/2)
 
   @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
