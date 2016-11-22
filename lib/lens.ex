@@ -8,6 +8,8 @@ defmodule Lens do
 
       iex> Lens.empty |> Lens.get(:anything)
       []
+      iex> Lens.empty |> Lens.map(1, &(&1 + 1))
+      1
   """
   @spec empty :: t
   deflens_raw empty do
@@ -31,11 +33,11 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Select lens based on a matcher function
+  Select the lens to use based on a matcher function
 
       iex> selector = fn
-      ...>  {:a, _} -> Lens.at(1)
-      ...>  {:b, _, _} -> Lens.at(2)
+      ...>   {:a, _} -> Lens.at(1)
+      ...>   {:b, _, _} -> Lens.at(2)
       ...> end
       iex> Lens.match(selector) |> Lens.get({:b, 2, 3})
       3
@@ -48,10 +50,12 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Access a value at position
+  Returns a lens that focuses on the n-th element of a list or tuple.
 
       iex> Lens.at(2) |> Lens.get({:a, :b, :c})
       :c
+      iex> Lens.at(1) |> Lens.map([:a, :b, :c], fn :b -> :d end)
+      [:a, :d, :c]
   """
   @spec at(Integer) :: t
   deflens_raw at(index) do
@@ -62,7 +66,7 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Creates a lens that focuses on the value under `key`.
+  Returns a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
       [1]
@@ -85,10 +89,12 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Access values at given keys
+  Returns a lens that focuses on the values of all the keys.
 
       iex> Lens.keys([:a, :c]) |> Lens.get(%{a: 1, b: 2, c: 3})
       [1, 3]
+      iex> Lens.keys([:a, :c]) |> Lens.map([a: 1, b: 2, c: 3], &(&1 + 1))
+      [a: 2, b: 2, c: 4]
   """
   @spec keys(nonempty_list(any)) :: t
   deflens_raw keys(keys) do
@@ -103,7 +109,7 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Access all items on an enumerable
+  Returns a lens that focuses on all the values in an enumerable.
 
       iex> Lens.all |> Lens.get([1, 2, 3])
       [1, 2, 3]
@@ -159,10 +165,10 @@ defmodule Lens do
   deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
   @doc ~S"""
-  Combine two lenses accessing both of them as one
+  Returns a lens that focuses on what both the lenses focus on.
 
-      iex> Lens.both(Lens.key(:a), Lens.key(:b) |> Lens.all) |> Lens.get(%{a: 1, b: [2, 3]})
-      [1, 2, 3]
+      iex> Lens.both(Lens.key(:a), Lens.key(:b) |> Lens.at(1)) |> Lens.get(%{a: 1, b: [2, 3]})
+      [1, 3]
   """
   @spec both(t, t) :: t
   deflens_raw both(lens1, lens2) do
@@ -174,10 +180,12 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Lens to access values from an enumeration for which the given predicate is true
+  Returns lens that focuses on all the elements of an enumerable that satisfy the given condition.
 
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.get([1, 2, 3, 4])
       [1, 3]
+      iex> Lens.filter(&Integer.is_odd/1) |> Lens.map([1, 2, 3, 4], &(&1 + 1))
+      [2, 2, 4, 4]
   """
   @spec filter((any -> boolean)) :: t
   deflens_raw filter(filter_fun) do
@@ -195,9 +203,9 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Access values from a previous lens that satisfy the given predicate
+  Returns a lens that focuses on a subset of elements focused on by the given lens that satisfy the given condition.
 
-      iex> Lens.both(Lens.key(:a), Lens.key(:b)) |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2})
+      iex> Lens.keys([:a, :b]) |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2})
       1
   """
   @spec satisfy(t, (any -> boolean)) :: t
@@ -216,7 +224,7 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Obtain a list of values from a lens
+  Returns a list of values that the lens focuses on in the given data.
 
       iex> Lens.keys([:a, :c]) |> Lens.to_list(%{a: 1, b: 2, c: 3})
       [1, 3]
@@ -225,7 +233,7 @@ defmodule Lens do
   def to_list(lens, data), do: get_in(data, [lens])
 
   @doc ~S"""
-  Perform a side effect on each value from a lens
+  Performs a side effect for each values this lens focuses on in the given data.
 
       iex> data = %{a: 1, b: 2, c: 3}
       iex> fun = fn -> Lens.keys([:a, :c]) |> Lens.each(data, &IO.inspect/1) end
@@ -237,7 +245,8 @@ defmodule Lens do
   def each(lens, data, fun), do: to_list(lens, data) |> Enum.each(fun)
 
   @doc ~S"""
-  Obtain the updated version of data by applying fun on lens.
+  Returns an updated version of the data by applying the given function to each value the lens focuses on and building
+  a data structure of the same shape with the updated values in place of the original ones.
 
       iex> data = [1, 2, 3, 4]
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.map(data, fn v -> v + 10 end)
@@ -247,9 +256,8 @@ defmodule Lens do
   def map(lens, data, fun), do: update_in(data, [lens], fun)
 
   @doc ~S"""
-  Get and update values inside data on a single pass as specified by the mapping function.
-
-  The mapping function takes a each value form the lens and must return a tuple `{value_to_return, value_to_update_on_data}`
+  Returns an updated version of the data and a transformed value from each location the lens focuses on. The
+  transformation function must return a tuple `{value_to_return, value_to_update}`.
 
       iex> data = %{a: 1, b: 2, c: 3}
       iex> Lens.keys([:a, :b, :c])
