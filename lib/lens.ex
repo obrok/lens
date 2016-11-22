@@ -89,6 +89,24 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that focuses on the value under the given key. If the key does not exist an error will be raised.
+
+      iex> Lens.key!(:a) |> Lens.get(%{a: 1, b: 2})
+      1
+      iex> Lens.key!(:a) |> Lens.get([a: 1, b: 2])
+      1
+      iex> Lens.key!(:c) |> Lens.get(%{a: 1, b: 2})
+      ** (KeyError) key :c not found in: %{a: 1, b: 2}
+  """
+  @spec key!(any) :: t
+  deflens_raw key!(key) do
+    fn data, fun ->
+      {res, updated} = fun.(fetch_at_key!(data, key))
+      {[res], set_at_key(data, key, updated)}
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that focuses on the values of all the keys.
 
       iex> Lens.keys([:a, :c]) |> Lens.get(%{a: 1, b: 2, c: 3})
@@ -291,6 +309,14 @@ defmodule Lens do
   defp set_at_key(data, key, value) do
     {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
     updated
+  end
+
+  defp fetch_at_key!(data, key) when is_map(data), do: Map.fetch!(data, key)
+  defp fetch_at_key!(data, key) do
+    case Access.fetch(data, key) do
+      :error -> raise(KeyError, key: key, term: data)
+      {:ok, value} -> value
+    end
   end
 
   defp get_at_index(data, index) when is_tuple(data), do: elem(data, index)
