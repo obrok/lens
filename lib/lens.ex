@@ -132,6 +132,22 @@ defmodule Lens do
   deflens front, do: before(0)
 
   @doc ~S"""
+  Returns a lens that focuses after the last element of a list. It will always return a nil when accessing, but can
+  be used to append elements.
+
+    iex> Lens.back |> Lens.get([:a, :b, :c])
+    nil
+    iex> Lens.back |> Lens.map([:a, :b, :c], fn nil -> :d end)
+    [:a, :b, :c, :d]
+  """
+  @spec back :: t
+  deflens_raw back do
+    fn data, fun ->
+      data |> Enum.count |> behind |> get_and_map(data, fun)
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
