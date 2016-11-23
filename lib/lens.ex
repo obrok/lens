@@ -120,6 +120,18 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that focuses before the first element of a list. It will always return a nil when accessing, but can
+  be used to prepend elements.
+
+    iex> Lens.front |> Lens.get([:a, :b, :c])
+    nil
+    iex> Lens.front |> Lens.map([:a, :b, :c], fn nil -> :d end)
+    [:d, :a, :b, :c]
+  """
+  @spec front :: t
+  deflens front, do: before(0)
+
+  @doc ~S"""
   Returns a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
