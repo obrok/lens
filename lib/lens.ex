@@ -84,6 +84,23 @@ defmodule Lens do
     indices |> Enum.map(&index/1) |> multiple
 
   @doc ~S"""
+  Returns a lens that focuses between a given index and the previous one in a list. It will always return a nil when
+  accessing, but can be used to insert elements.
+
+      iex> Lens.before(2) |> Lens.get([:a, :b, :c])
+      nil
+      iex> Lens.before(2) |> Lens.map([:a, :b, :c], fn nil -> :d end)
+      [:a, :b, :d, :c]
+  """
+  deflens_raw before(index) do
+    fn data, fun ->
+      {res, item} = fun.(nil)
+      {init, tail} = Enum.split(data, index)
+      {[res], init ++ [item] ++ tail}
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
