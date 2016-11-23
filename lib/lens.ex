@@ -92,10 +92,29 @@ defmodule Lens do
       iex> Lens.before(2) |> Lens.map([:a, :b, :c], fn nil -> :d end)
       [:a, :b, :d, :c]
   """
+  @spec before(non_neg_integer) :: t
   deflens_raw before(index) do
     fn data, fun ->
       {res, item} = fun.(nil)
       {init, tail} = Enum.split(data, index)
+      {[res], init ++ [item] ++ tail}
+    end
+  end
+
+  @doc ~S"""
+  Returns a lens that focuses between a given index and the next one in a list. It will always return a nil when
+  accessing, but can be used to insert elements.
+
+      iex> Lens.behind(1) |> Lens.get([:a, :b, :c])
+      nil
+      iex> Lens.behind(1) |> Lens.map([:a, :b, :c], fn nil -> :d end)
+      [:a, :b, :d, :c]
+  """
+  @spec behind(non_neg_integer) :: t
+  deflens_raw behind(index) do
+    fn data, fun ->
+      {res, item} = fun.(nil)
+      {init, tail} = Enum.split(data, index + 1)
       {[res], init ++ [item] ++ tail}
     end
   end
