@@ -113,6 +113,11 @@ defmodule Lens do
       [1, 3]
       iex> Lens.keys([:a, :c]) |> Lens.map([a: 1, b: 2, c: 3], &(&1 + 1))
       [a: 2, b: 2, c: 4]
+
+  If any of the keys doesn't exist the update function will receive a nil.
+
+      iex> Lens.keys([:a, :c]) |> Lens.map(%{a: 1, b: 2}, fn nil -> 3; x -> x end)
+      %{a: 1, b: 2, c: 3}
   """
   @spec keys(nonempty_list(any)) :: t
   deflens keys(keys), do:
