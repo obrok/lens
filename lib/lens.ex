@@ -66,6 +66,24 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  An alias for `at`.
+  """
+  @spec index(non_neg_integer) :: t
+  deflens index(index), do: at(index)
+
+  @doc ~S"""
+  Returns a lens that focuses on all of the supplied indices.
+
+    iex> Lens.indices([0, 2]) |> Lens.get([:a, :b, :c])
+    [:a, :c]
+    iex> Lens.indices([0, 2]) |> Lens.map([1, 2, 3], &(&1 + 1))
+    [2, 2, 4]
+  """
+  @spec indices([non_neg_integer]) :: t
+  deflens indices(indices), do:
+    indices |> Enum.map(&index/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
+
+  @doc ~S"""
   Returns a lens that focuses on the value under `key`.
 
       iex> Lens.to_list(Lens.key(:foo), %{foo: 1, bar: 2})
@@ -121,7 +139,7 @@ defmodule Lens do
   """
   @spec keys(nonempty_list(any)) :: t
   deflens keys(keys), do:
-    keys |> Enum.map(&Lens.key/1) |> Enum.reverse |> Enum.reduce(Lens.empty, &Lens.both/2)
+    keys |> Enum.map(&Lens.key/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, an error is raised.
@@ -135,7 +153,7 @@ defmodule Lens do
   """
   @spec keys!(nonempty_list(any)) :: t
   deflens keys!(keys), do:
-    keys |> Enum.map(&Lens.key!/1) |> Enum.reverse |> Enum.reduce(Lens.empty, &Lens.both/2)
+    keys |> Enum.map(&Lens.key!/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
 
   @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
@@ -174,7 +192,7 @@ defmodule Lens do
       [:c, %{b: :c}]
   """
   @spec seq_both(t, t) :: t
-  deflens seq_both(lens1, lens2), do: Lens.both(Lens.seq(lens1, lens2), lens1)
+  deflens seq_both(lens1, lens2), do: both(seq(lens1, lens2), lens1)
 
   @doc ~S"""
   Make a lens recursive
