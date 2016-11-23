@@ -81,7 +81,7 @@ defmodule Lens do
   """
   @spec indices([non_neg_integer]) :: t
   deflens indices(indices), do:
-    indices |> Enum.map(&index/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
+    indices |> Enum.map(&index/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on the value under `key`.
@@ -139,7 +139,7 @@ defmodule Lens do
   """
   @spec keys(nonempty_list(any)) :: t
   deflens keys(keys), do:
-    keys |> Enum.map(&Lens.key/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
+    keys |> Enum.map(&Lens.key/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, an error is raised.
@@ -153,7 +153,7 @@ defmodule Lens do
   """
   @spec keys!(nonempty_list(any)) :: t
   deflens keys!(keys), do:
-    keys |> Enum.map(&Lens.key!/1) |> Enum.reverse |> Enum.reduce(empty, &both/2)
+    keys |> Enum.map(&Lens.key!/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
@@ -225,6 +225,16 @@ defmodule Lens do
       {res1 ++ res2, changed2}
     end
   end
+
+  @doc ~S"""
+  Returns a lens that focuses on what all of the supplied lenses focus on.
+
+      iex> Lens.multiple([Lens.key(:a), Lens.key(:b), Lens.root]) |> Lens.get(%{a: 1, b: 2})
+      [1, 2, %{a: 1, b: 2}]
+  """
+  @spec multiple([t]) :: t
+  deflens multiple(lenses), do:
+    lenses |> Enum.reverse |> Enum.reduce(empty, &both/2)
 
   @doc ~S"""
   Returns lens that focuses on all the elements of an enumerable that satisfy the given condition.
