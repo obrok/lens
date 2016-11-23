@@ -57,7 +57,7 @@ defmodule Lens do
       iex> Lens.at(1) |> Lens.map([:a, :b, :c], fn :b -> :d end)
       [:a, :d, :c]
   """
-  @spec at(Integer) :: t
+  @spec at(non_neg_integer) :: t
   deflens_raw at(index) do
     fn data, fun ->
       {res, updated} = fun.(get_at_index(data, index))
