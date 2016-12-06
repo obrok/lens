@@ -8,6 +8,7 @@ env:
   global:
     - MIX_HOME=$(pwd)/.mix
 script:
+  - mix compile --warnings-as-errors
   - mix test
   - mix dialyze
 cache:
