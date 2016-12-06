@@ -32,6 +32,25 @@ defmodule Lens.Macros do
     end
   end
 
+  @doc ~S"""
+  Same as `deflens` but creates private functions instead.
+  """
+  defmacro deflensp(header = {name, _, args}, do: body) do
+    args = case args do
+      nil -> []
+      _ -> args
+    end
+
+    quote do
+      defp unquote(header), do: unquote(body)
+
+      @doc false
+      defp unquote(name)(previous, unquote_splicing(args)) do
+        Lens.seq(previous, unquote(name)(unquote_splicing(args)))
+      end
+    end
+  end
+
   @doc false
   defmacro deflens_raw(header = {name, _, args}, do: body) do
     args = case args do
