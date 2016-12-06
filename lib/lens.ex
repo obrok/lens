@@ -280,6 +280,16 @@ defmodule Lens do
 
       iex> Lens.both(Lens.key(:a), Lens.key(:b) |> Lens.at(1)) |> Lens.get(%{a: 1, b: [2, 3]})
       [1, 3]
+
+  Bear in mind that what the first lens focuses on will be processed first. Other functions in the library are designed
+  so that the part is processed before the whole and it is advisable to do the same when using this function directly.
+  Not adhering to this principle might lead to the second lens not being able to perform its traversal on a changed
+  version of the structure.
+
+      iex> Lens.both(Lens.root, Lens.key(:a)) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
+      ** (FunctionClauseError) no function clause matching in Access.fetch/2
+      iex> Lens.both(Lens.key(:a), Lens.root) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
+      {[1, %{a: :foo}], :foo}
   """
   @spec both(t, t) :: t
   deflens_raw both(lens1, lens2) do
