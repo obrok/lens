@@ -1,3 +1,11 @@
+0.2.0
++ deflensp for easily defining private lenses
++ Lens.back for focusing after the end of a list
++ Lens.front for focusing before the beginning of a list
++ Lens.behind for focusing after an element in a list
++ Lens.before for focusing before an element in a list
++ Lens.multiple for combining many lenses
++ Lens.indices for focusing on many indices at once
 0.1.1
 ~ Fixed typespec for Lens.at
 0.1.0
