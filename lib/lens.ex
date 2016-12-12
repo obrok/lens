@@ -74,10 +74,10 @@ defmodule Lens do
   @doc ~S"""
   Returns a lens that focuses on all of the supplied indices.
 
-    iex> Lens.indices([0, 2]) |> Lens.get([:a, :b, :c])
-    [:a, :c]
-    iex> Lens.indices([0, 2]) |> Lens.map([1, 2, 3], &(&1 + 1))
-    [2, 2, 4]
+      iex> Lens.indices([0, 2]) |> Lens.get([:a, :b, :c])
+      [:a, :c]
+      iex> Lens.indices([0, 2]) |> Lens.map([1, 2, 3], &(&1 + 1))
+      [2, 2, 4]
   """
   @spec indices([non_neg_integer]) :: t
   deflens indices(indices), do:
@@ -123,10 +123,10 @@ defmodule Lens do
   Returns a lens that focuses before the first element of a list. It will always return a nil when accessing, but can
   be used to prepend elements.
 
-    iex> Lens.front |> Lens.get([:a, :b, :c])
-    nil
-    iex> Lens.front |> Lens.map([:a, :b, :c], fn nil -> :d end)
-    [:d, :a, :b, :c]
+      iex> Lens.front |> Lens.get([:a, :b, :c])
+      nil
+      iex> Lens.front |> Lens.map([:a, :b, :c], fn nil -> :d end)
+      [:d, :a, :b, :c]
   """
   @spec front :: t
   deflens front, do: before(0)
@@ -135,10 +135,10 @@ defmodule Lens do
   Returns a lens that focuses after the last element of a list. It will always return a nil when accessing, but can
   be used to append elements.
 
-    iex> Lens.back |> Lens.get([:a, :b, :c])
-    nil
-    iex> Lens.back |> Lens.map([:a, :b, :c], fn nil -> :d end)
-    [:a, :b, :c, :d]
+      iex> Lens.back |> Lens.get([:a, :b, :c])
+      nil
+      iex> Lens.back |> Lens.map([:a, :b, :c], fn nil -> :d end)
+      [:a, :b, :c, :d]
   """
   @spec back :: t
   deflens_raw back do
