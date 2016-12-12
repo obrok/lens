@@ -224,6 +224,13 @@ defmodule Lens do
 
       iex> Lens.all |> Lens.get([1, 2, 3])
       [1, 2, 3]
+
+  Does work with updates but produces a list from any enumerable by default:
+
+      iex> Lens.all |> Lens.map(MapSet.new([1, 2, 3]), &(&1 + 1))
+      [2, 3, 4]
+
+  See [into](#into/2) on how to rectify this.
   """
   @spec all :: t
   deflens all, do: filter(fn _ -> true end)
@@ -317,6 +324,13 @@ defmodule Lens do
       [1, 3]
       iex> Lens.filter(&Integer.is_odd/1) |> Lens.map([1, 2, 3, 4], &(&1 + 1))
       [2, 2, 4, 4]
+
+  Does work with updates but produces a list from any enumerable by default:
+
+      iex> Lens.filter(&Integer.is_odd/1) |> Lens.map(MapSet.new([1, 2, 3, 4]), &(&1 + 1))
+      [2, 2, 4, 4]
+
+  See [into](#into/2) on how to rectify this.
   """
   @spec filter((any -> boolean)) :: t
   deflens_raw filter(filter_fun) do
@@ -330,6 +344,20 @@ defmodule Lens do
         end
       end)
       {Enum.reverse(res), Enum.reverse(updated)}
+    end
+  end
+
+  @doc ~S"""
+  Returns a lens that does not change the focus of of the given lens, but puts the results into the given collectable
+  when updating.
+
+      iex> Lens.all |> Lens.into(MapSet.new) |> Lens.map(MapSet.new([-2, -1, 1, 2]), &(&1 * &1))
+      MapSet.new([1, 4])
+  """
+  deflens_raw into(lens, collectable) do
+    fn data, fun ->
+      {res, updated} = get_and_map(lens, data, fun)
+      {res, Enum.into(updated, collectable)}
     end
   end
 
