@@ -17,7 +17,7 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Returns a lens that focuses on all of the data in the given scope.
+  Returns a lens that yields the entirety of the data currently under focus.
 
       iex> Lens.to_list(Lens.root, :data)
       [:data]
