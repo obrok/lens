@@ -1,3 +1,6 @@
+0.3.0
++ Lens.const for defining lenses that always focus on the same value
++ Lens.into for lenses that can collect into a specific Collectable on update
 0.2.0
 + deflensp for easily defining private lenses
 + Lens.back for focusing after the end of a list
