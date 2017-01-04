@@ -17,6 +17,26 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that ignores the data and always focuses on the given value.
+
+      iex> Lens.const(3) |> Lens.get(:anything)
+      3
+      iex> Lens.const(3) |> Lens.map(1, &(&1 + 1))
+      4
+      iex> import Integer
+      iex> lens = Lens.keys([:a, :b]) |> Lens.match(fn v -> if is_odd(v), do: Lens.root, else: Lens.const(0) end)
+      iex> Lens.map(lens, %{a: 11, b: 12}, &(&1 + 1))
+      %{a: 12, b: 1}
+  """
+  @spec const(any) :: t
+  deflens_raw const(value) do
+    fn _data, fun ->
+      {res, updated} = fun.(value)
+      {[res], updated}
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that yields the entirety of the data currently under focus.
 
       iex> Lens.to_list(Lens.root, :data)
