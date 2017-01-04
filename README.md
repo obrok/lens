@@ -2,8 +2,7 @@
 
 [![Build Status](https://travis-ci.org/obrok/lens.png?branch=master)](https://travis-ci.org/obrok/lens)
 
-A utility for working with nested data structures. Implements functional lenses that are Functors (mappable),
-Traversable, and Foldable.
+A utility for working with nested data structures.
 
 ## Example
 

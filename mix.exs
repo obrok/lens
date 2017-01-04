@@ -39,8 +39,7 @@ defmodule Lens.Mixfile do
   end
 
   defp description do
-    "A utility for working with nested data structures. Implements functional lenses that are Functors (mappable), "
-    <> "Traversable, and Foldable."
+    "A utility for working with nested data structures."
   end
 
   defp package do
