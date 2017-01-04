@@ -17,12 +17,14 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Returns a lens that focuses on the whole data.
+  Returns a lens that yields the entirety of the data currently under focus.
 
       iex> Lens.to_list(Lens.root, :data)
       [:data]
       iex> Lens.map(Lens.root, :data, fn :data -> :other_data end)
       :other_data
+      iex> Lens.key(:a) |> Lens.both(Lens.root, Lens.key(:b)) |> Lens.to_list(%{a: %{b: 1}})
+      [%{b: 1}, 1]
   """
   @spec root :: t
   deflens_raw root do
