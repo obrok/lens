@@ -13,7 +13,7 @@ defmodule LensTest do
     test "to_list on keyword", do: assert Lens.to_list(Lens.key(:a), [a: :b]) == [:b]
 
     test "each" do
-      this = self
+      this = self()
       Lens.each(Lens.key(:a), %{a: :b}, fn x -> send(this, x) end)
       assert_receive :b
     end
@@ -40,7 +40,7 @@ defmodule LensTest do
     test "to_list", do: assert Lens.to_list(Lens.all, [:a, :b, :c]) == [:a, :b, :c]
 
     test "each" do
-      this = self
+      this = self()
       Lens.each(Lens.all, [:a, :b, :c], fn x -> send(this, x) end)
       assert_receive :a
       assert_receive :b
@@ -65,7 +65,7 @@ defmodule LensTest do
     test "to_list", do: assert Lens.to_list(Lens.seq(Lens.key(:a), Lens.key(:b)), %{a: %{b: :c}}) == [:c]
 
     test "each" do
-      this = self
+      this = self()
       Lens.each(Lens.seq(Lens.key(:a), Lens.key(:b)), %{a: %{b: :c}}, fn x -> send(this, x) end)
       assert_receive :c
     end

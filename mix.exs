@@ -8,10 +8,10 @@ defmodule Lens.Mixfile do
       elixir: "~> 1.3",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      deps: deps,
-      description: description,
-      package: package,
-      docs: docs,
+      deps: deps(),
+      description: description(),
+      package: package(),
+      docs: docs(),
     ]
   end
 

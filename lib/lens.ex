@@ -337,7 +337,7 @@ defmodule Lens do
   """
   @spec multiple([t]) :: t
   deflens multiple(lenses), do:
-    lenses |> Enum.reverse |> Enum.reduce(empty, &both/2)
+    lenses |> Enum.reverse |> Enum.reduce(empty(), &both/2)
 
   @doc ~S"""
   Returns lens that focuses on all the elements of an enumerable that satisfy the given condition.
