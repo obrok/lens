@@ -1,6 +1,10 @@
+0.3.1
+~ Fix warnings on Elixir 1.4.0
+
 0.3.0
 + Lens.const for defining lenses that always focus on the same value
 + Lens.into for lenses that can collect into a specific Collectable on update
+
 0.2.0
 + deflensp for easily defining private lenses
 + Lens.back for focusing after the end of a list
@@ -9,11 +13,14 @@
 + Lens.before for focusing before an element in a list
 + Lens.multiple for combining many lenses
 + Lens.indices for focusing on many indices at once
+
 0.1.1
 ~ Fixed typespec for Lens.at
+
 0.1.0
 + Ability to use Lens with Access/get_in/update_in/get_and_update_in
 ~ Swap the order of arguments so that the Lens.t is the first argument in Lens
 	functions
+
 0.0.1
 ~ Initial release
