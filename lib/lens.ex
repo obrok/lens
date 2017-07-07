@@ -416,6 +416,17 @@ defmodule Lens do
   deflens map_values, do: all() |> into(%{}) |> at(1)
 
   @doc ~S"""
+  Returns a lens that focuses on all keys of a map.
+
+      iex> Lens.map_keys() |> Lens.get(%{a: 1, b: 2})
+      [:a, :b]
+      iex> Lens.map_keys() |> Lens.map(%{1 => :a, 2 => :b}, &(&1 + 1))
+      %{2 => :a, 3 => :b}
+  """
+  @spec map_keys :: t
+  deflens map_keys, do: all() |> into(%{}) |> at(0)
+
+  @doc ~S"""
   Returns a list of values that the lens focuses on in the given data.
 
       iex> Lens.keys([:a, :c]) |> Lens.to_list(%{a: 1, b: 2, c: 3})
