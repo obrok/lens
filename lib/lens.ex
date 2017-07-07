@@ -405,6 +405,17 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that focuses on all values of a map.
+
+      iex> Lens.map_values() |> Lens.get(%{a: 1, b: 2})
+      [1, 2]
+      iex> Lens.map_values() |> Lens.map(%{a: 1, b: 2}, &(&1 + 1))
+      %{a: 2, b: 3}
+  """
+  @spec map_values :: t
+  deflens map_values, do: all() |> into(%{}) |> at(1)
+
+  @doc ~S"""
   Returns a list of values that the lens focuses on in the given data.
 
       iex> Lens.keys([:a, :c]) |> Lens.to_list(%{a: 1, b: 2, c: 3})
