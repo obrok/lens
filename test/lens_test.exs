@@ -115,9 +115,9 @@ defmodule LensTest do
         ]
       }
 
-      lens = Lens.recur(Lens.seq(Lens.key(:items), Lens.all)) |> Lens.seq(Lens.key(:data))
+      lens = Lens.recur(Lens.key(:items) |> Lens.all()) |> Lens.key(:data)
 
-      assert Lens.get_and_map(lens, data, fn x -> {x, x + 1} end) == {[2, 3, 4], %{
+      assert Lens.get_and_map(lens, data, fn x -> {x, x + 1} end) == {[2, 4, 3], %{
         data: 1,
         items: [
           %{data: 3, items: []},

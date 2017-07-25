@@ -299,7 +299,7 @@ defmodule Lens do
       ...> ]}
       iex> lens = Lens.recur(Lens.key(:items) |> Lens.all) |> Lens.key(:v)
       iex> Lens.get(lens, data)
-      [1, 2, 3]
+      [1, 3, 2]
   """
   @spec recur(t) :: t
   deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
@@ -481,7 +481,7 @@ defmodule Lens do
     {res, changed} = get_and_map(lens, data, fn item ->
       {results, changed1} = do_recur(lens, item, fun)
       {res_parent, changed2} = fun.(changed1)
-      {[res_parent | results], changed2}
+      {results ++ [res_parent], changed2}
     end)
 
     {Enum.concat(res), changed}
