@@ -304,7 +304,11 @@ defmodule Lens do
   @spec recur(t) :: t
   deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
-  @doc ~S"""
+  case Version.compare(System.version, "1.5.0") do
+    :lt -> @access_error "Access.fetch/2"
+    _ -> @access_error "Access.get/3"
+  end
+  @doc ~s"""
   Returns a lens that focuses on what both the lenses focus on.
 
       iex> Lens.both(Lens.key(:a), Lens.key(:b) |> Lens.at(1)) |> Lens.get(%{a: 1, b: [2, 3]})
@@ -316,7 +320,7 @@ defmodule Lens do
   version of the structure.
 
       iex> Lens.both(Lens.root, Lens.key(:a)) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
-      ** (FunctionClauseError) no function clause matching in Access.fetch/2
+      ** (FunctionClauseError) no function clause matching in #{@access_error}
       iex> Lens.both(Lens.key(:a), Lens.root) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
       {[1, %{a: :foo}], :foo}
   """
