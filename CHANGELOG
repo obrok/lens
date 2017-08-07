@@ -1,3 +1,7 @@
+0.4.0
+~ Make the values returned from `recur` follow the part -> whole pattern
++ Lens.map_keys and Lens.map_values for working with maps
+
 0.3.1
 ~ Fix warnings on Elixir 1.4.0
 
