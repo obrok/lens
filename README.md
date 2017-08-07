@@ -2,7 +2,8 @@
 
 [![Build Status](https://travis-ci.org/obrok/lens.png?branch=master)](https://travis-ci.org/obrok/lens)
 
-A utility for working with nested data structures.
+A utility for working with nested data structures. Take a look at [this blog post](https://yapee.svbtle.com/nested-data-structures-with-lens)
+for a gentler introduction.
 
 ## Example
 
