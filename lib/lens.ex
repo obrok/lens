@@ -255,7 +255,15 @@ defmodule Lens do
   See [into](#into/2) on how to rectify this.
   """
   @spec all :: t
-  deflens all, do: filter(fn _ -> true end)
+  deflens_raw all do
+    fn data, fun ->
+      {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
+        {res_item, updated_item} = fun.(item)
+        {[res_item | res], [updated_item | updated]}
+      end)
+      {Enum.reverse(res), Enum.reverse(updated)}
+    end
+  end
 
   @doc ~S"""
   Compose a pair of lens by applying the second to the result of the first
@@ -344,36 +352,6 @@ defmodule Lens do
     lenses |> Enum.reverse |> Enum.reduce(empty(), &both/2)
 
   @doc ~S"""
-  Returns lens that focuses on all the elements of an enumerable that satisfy the given condition.
-
-      iex> Lens.filter(&Integer.is_odd/1) |> Lens.get([1, 2, 3, 4])
-      [1, 3]
-      iex> Lens.filter(&Integer.is_odd/1) |> Lens.map([1, 2, 3, 4], &(&1 + 1))
-      [2, 2, 4, 4]
-
-  Does work with updates but produces a list from any enumerable by default:
-
-      iex> Lens.filter(&Integer.is_odd/1) |> Lens.map(MapSet.new([1, 2, 3, 4]), &(&1 + 1))
-      [2, 2, 4, 4]
-
-  See [into](#into/2) on how to rectify this.
-  """
-  @spec filter((any -> boolean)) :: t
-  deflens_raw filter(filter_fun) do
-    fn data, fun ->
-      {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
-        if filter_fun.(item) do
-          {res_item, updated_item} = fun.(item)
-          {[res_item | res], [updated_item | updated]}
-        else
-          {res, [item | updated]}
-        end
-      end)
-      {Enum.reverse(res), Enum.reverse(updated)}
-    end
-  end
-
-  @doc ~S"""
   Returns a lens that does not change the focus of of the given lens, but puts the results into the given collectable
   when updating.
 
@@ -390,11 +368,11 @@ defmodule Lens do
   @doc ~S"""
   Returns a lens that focuses on a subset of elements focused on by the given lens that satisfy the given condition.
 
-      iex> Lens.map_values() |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2, c: 3, d: 4})
+      iex> Lens.map_values() |> Lens.filter(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2, c: 3, d: 4})
       [1, 3]
   """
-  @spec satisfy(t, (any -> boolean)) :: t
-  deflens_raw satisfy(lens, filter_fun) do
+  @spec filter(t, (any -> boolean)) :: t
+  deflens_raw filter(lens, filter_fun) do
     fn data, fun ->
       {res, changed} = get_and_map(lens, data, fn item ->
         if filter_fun.(item) do
@@ -416,7 +394,7 @@ defmodule Lens do
       [2, 4]
   """
   @spec reject(t, (any -> boolean)) :: t
-  def reject(lens, filter_fun), do: satisfy(lens, & not filter_fun.(&1))
+  def reject(lens, filter_fun), do: filter(lens, & not filter_fun.(&1))
 
   @doc ~S"""
   Returns a lens that focuses on all values of a map.
@@ -466,7 +444,7 @@ defmodule Lens do
   a data structure of the same shape with the updated values in place of the original ones.
 
       iex> data = [1, 2, 3, 4]
-      iex> Lens.filter(&Integer.is_odd/1) |> Lens.map(data, fn v -> v + 10 end)
+      iex> Lens.all() |> Lens.filter(&Integer.is_odd/1) |> Lens.map(data, fn v -> v + 10 end)
       [11, 2, 13, 4]
   """
   @spec map(t, any, (any -> any)) :: any
@@ -478,7 +456,7 @@ defmodule Lens do
 
       iex> data = %{a: 1, b: 2, c: 3}
       iex> Lens.keys([:a, :b, :c])
-      ...> |> Lens.satisfy(&Integer.is_odd/1)
+      ...> |> Lens.filter(&Integer.is_odd/1)
       ...> |> Lens.get_and_map(data, fn v -> {v + 1, v + 10} end)
       {[2, 4], %{a: 11, b: 2, c: 13}}
   """

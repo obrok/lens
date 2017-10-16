@@ -54,13 +54,6 @@ defmodule LensTest do
     end
   end
 
-  describe "filter" do
-    test "get_and_map" do
-      assert Lens.get_and_map(Lens.filter(&Integer.is_odd/1), [1, 2, 3, 4], fn n -> {n, n + 1} end) ==
-        {[1, 3], [2, 2, 4, 4]}
-    end
-  end
-
   describe "seq" do
     test "to_list", do: assert Lens.to_list(Lens.seq(Lens.key(:a), Lens.key(:b)), %{a: %{b: :c}}) == [:c]
 
@@ -93,11 +86,11 @@ defmodule LensTest do
     end
   end
 
-  describe "satisfy" do
+  describe "filter" do
     test "get_and_map" do
       lens =
         Lens.both(Lens.keys([:a, :b]), Lens.seq(Lens.key(:c), Lens.all))
-        |> Lens.satisfy(&Integer.is_odd/1)
+        |> Lens.filter(&Integer.is_odd/1)
       assert Lens.get_and_map(lens, %{a: 1, b: 2, c: [3, 4]}, fn x -> {x, x + 1} end) ==
         {[1, 3], %{a: 2, b: 2, c: [4, 4]}}
     end
