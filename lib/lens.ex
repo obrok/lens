@@ -390,8 +390,8 @@ defmodule Lens do
   @doc ~S"""
   Returns a lens that focuses on a subset of elements focused on by the given lens that satisfy the given condition.
 
-      iex> Lens.keys([:a, :b]) |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2})
-      1
+      iex> Lens.map_values() |> Lens.satisfy(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2, c: 3, d: 4})
+      [1, 3]
   """
   @spec satisfy(t, (any -> boolean)) :: t
   deflens_raw satisfy(lens, filter_fun) do
@@ -407,6 +407,16 @@ defmodule Lens do
       {Enum.concat(res), changed}
     end
   end
+
+  @doc ~S"""
+  Returns a lens that focuses on a subset of elements focused on by the given lens that don't satisfy the given
+  condition.
+
+      iex> Lens.map_values() |> Lens.reject(&Integer.is_odd/1) |> Lens.get(%{a: 1, b: 2, c: 3, d: 4})
+      [2, 4]
+  """
+  @spec reject(t, (any -> boolean)) :: t
+  def reject(lens, filter_fun), do: satisfy(lens, & not filter_fun.(&1))
 
   @doc ~S"""
   Returns a lens that focuses on all values of a map.
