@@ -70,11 +70,11 @@ iex> Lens.get_and_map(lens, data, fn size -> {size, round(size)} end)
 Lenses are also compatible with `Access` and associated `Kernel` functions:
 
 ```elixir
-iex> get_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)])
+iex> get_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)])
 [1, 3]
-iex> update_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)], fn x -> x + 1 end)
+iex> update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -> x + 1 end)
 [2, 2, 4]
-iex> get_and_update_in([1, 2, 3], [Lens.filter(&Integer.is_odd/1)], fn x -> {x - 1, x + 1} end)
+iex> get_and_update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -> {x - 1, x + 1} end)
 {[0, 2], [2, 2, 4]}
 ```
 
