@@ -386,6 +386,10 @@ defmodule Lens do
     end
   end
 
+  @doc false
+  @spec satisfy(t, (any -> boolean)) :: t
+  def satisfy(lens, filter_fun), do: filter(lens, filter_fun)
+
   @doc ~S"""
   Returns a lens that focuses on a subset of elements focused on by the given lens that don't satisfy the given
   condition.
