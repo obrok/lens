@@ -211,6 +211,28 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that focuses on the value under the given key. If they key does not exist it focuses on nothing.
+
+      iex> Lens.key?(:a) |> Lens.to_list(%{a: 1, b: 2})
+      [1]
+      iex> Lens.key?(:a) |> Lens.to_list([a: 1, b: 2])
+      [1]
+      iex> Lens.key?(:c) |> Lens.to_list(%{a: 1, b: 2})
+      []
+  """
+  @spec key?(any) :: t
+  deflens_raw key?(key) do
+    fn data, fun ->
+      case fetch_at_key(data, key) do
+        :error -> {[], data}
+        {:ok, value} ->
+          {res, updated} = fun.(value)
+          {[res], set_at_key(data, key, updated)}
+      end
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that focuses on the values of all the keys.
 
       iex> Lens.keys([:a, :c]) |> Lens.get(%{a: 1, b: 2, c: 3})
@@ -312,10 +334,6 @@ defmodule Lens do
   @spec recur(t) :: t
   deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
-  case Version.compare(System.version, "1.5.0") do
-    :lt -> @access_error "Access.fetch/2"
-    _ -> @access_error "Access.get/3"
-  end
   @doc ~s"""
   Returns a lens that focuses on what both the lenses focus on.
 
@@ -328,7 +346,7 @@ defmodule Lens do
   version of the structure.
 
       iex> Lens.both(Lens.root, Lens.key(:a)) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
-      ** (FunctionClauseError) no function clause matching in #{@access_error}
+      ** (FunctionClauseError) no function clause matching in Access.fetch/2
       iex> Lens.both(Lens.key(:a), Lens.root) |> Lens.get_and_map(%{a: 1}, fn x -> {x, :foo} end)
       {[1, %{a: :foo}], :foo}
   """
@@ -483,8 +501,12 @@ defmodule Lens do
     {Enum.concat(res), changed}
   end
 
-  defp get_at_key(data, key) when is_map(data), do: Map.get(data, key)
-  defp get_at_key(data, key), do: Access.get(data, key)
+  defp get_at_key(data, key) do
+    case fetch_at_key(data, key) do
+      :error -> nil
+      {:ok, value} -> value
+    end
+  end
 
   defp set_at_key(data, key, value) when is_map(data), do: Map.put(data, key, value)
   defp set_at_key(data, key, value) do
@@ -492,13 +514,15 @@ defmodule Lens do
     updated
   end
 
-  defp fetch_at_key!(data, key) when is_map(data), do: Map.fetch!(data, key)
   defp fetch_at_key!(data, key) do
-    case Access.fetch(data, key) do
+    case fetch_at_key(data, key) do
       :error -> raise(KeyError, key: key, term: data)
       {:ok, value} -> value
     end
   end
+
+  defp fetch_at_key(data, key) when is_map(data), do: Map.fetch(data, key)
+  defp fetch_at_key(data, key), do: Access.fetch(data, key)
 
   defp get_at_index(data, index) when is_tuple(data), do: elem(data, index)
   defp get_at_index(data, index), do: Enum.at(data, index)
