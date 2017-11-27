@@ -264,6 +264,20 @@ defmodule Lens do
     keys |> Enum.map(&Lens.key!/1) |> multiple
 
   @doc ~S"""
+  Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, it is ignored.
+
+      iex> Lens.keys?([:a, :c]) |> Lens.to_list(%{a: 1, b: 2, c: 3})
+      [1, 3]
+      iex> Lens.keys?([:a, :c]) |> Lens.map([a: 1, b: 2, c: 3], &(&1 + 1))
+      [a: 2, b: 2, c: 4]
+      iex> Lens.keys?([:a, :c]) |> Lens.to_list(%{a: 1, b: 2})
+      [1]
+  """
+  @spec keys?(nonempty_list(any)) :: t
+  deflens keys?(keys), do:
+    keys |> Enum.map(&Lens.key?/1) |> multiple
+
+  @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
 
       iex> Lens.all |> Lens.get([1, 2, 3])
