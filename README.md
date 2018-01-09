@@ -80,17 +80,21 @@ iex> get_and_update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)]
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+The package can be installed as:
 
   1. Add lens to your list of dependencies in `mix.exs`:
 
+        ```elixir
         def deps do
-          [{:lens, "~> 0.3.0"}]
+          [{:lens, "~> 0.5.0"}]
         end
+        ```
 
   2. Ensure lens is started before your application:
-
+  
+        ```elixir
         def application do
           [applications: [:lens]]
         end
+        ```
 
