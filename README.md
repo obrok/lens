@@ -6,6 +6,19 @@ A utility for working with nested data structures. Take a look at
 [Nested data structures with functional lenses](https://yapee.svbtle.com/nested-data-structures-with-lens)
 for a gentler introduction.
 
+## Installation
+
+The package can be installed by adding `lens` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:lens, "~> 0.5.0"}
+  ]
+end
+```
+
+
 ## Example
 
 Lens allows you to separate which parts of a complex data structure need to be processed from the actual
@@ -77,24 +90,3 @@ iex> update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -
 iex> get_and_update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -> {x - 1, x + 1} end)
 {[0, 2], [2, 2, 4]}
 ```
-
-## Installation
-
-The package can be installed as:
-
-  1. Add lens to your list of dependencies in `mix.exs`:
-
-        ```elixir
-        def deps do
-          [{:lens, "~> 0.5.0"}]
-        end
-        ```
-
-  2. Ensure lens is started before your application:
-  
-        ```elixir
-        def application do
-          [applications: [:lens]]
-        end
-        ```
-
