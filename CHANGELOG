@@ -1,3 +1,8 @@
+0.6.0
+- Remove get as it was easy to create bugs with it
++ Add Lens.one! to both fetch a single element and assert that there is only one
++ Add Lens.context for fetching {context, part} pairs
+
 0.5.0
 ~ Lens.satisfy is deprecated
 ~ Lens.filter does what satisfy used to do. Use Lens.all |> Lens.filter to emulate the old behavior

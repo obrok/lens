@@ -13,11 +13,17 @@ The package can be installed by adding `lens` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:lens, "~> 0.5.0"}
+    {:lens, "~> 0.6.0"}
   ]
 end
 ```
 
+## Migration from pre-0.6.0
+
+In 0.6.0 the function `Lens.get` got removed. The reason was that it was very easy to create a bug where a list was
+treated as a single element or vice-versa. Wherever you used `Lens.get` you now should either use `Lens.one!` if the
+invocation should always return exactly one element (this will crash if there is any other number of elements) or
+`Lens.to_list` and match on the result if you want to behave differently for different numbers of elements.
 
 ## Example
 
