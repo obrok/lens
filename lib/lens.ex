@@ -373,6 +373,28 @@ defmodule Lens do
     end
   end
 
+  @doc """
+  Combines the two provided lenses in a way similar to `seq`. However instead of only focusing on what the final lens
+  would focus on it focuses on pairs of the form `{context, part}`, where context is the focus of the first lens in
+  which the focus of the second lens was found.
+
+      iex> lens = Lens.context(Lens.keys([:a, :c]), Lens.key(:b) |> Lens.all())
+      iex> Lens.to_list(lens, %{a: %{b: [1, 2]}, c: %{b: [3]}})
+      [{%{b: [1, 2]}, 1}, {%{b: [1, 2]}, 2}, {%{b: [3]}, 3}]
+      iex> Lens.map(lens, %{a: %{b: [1, 2]}, c: %{b: [3]}}, fn({%{b: bs}, value}) ->
+      ...>   length(bs) + value
+      ...> end)
+      %{a: %{b: [3, 4]}, c: %{b: [4]}}
+  """
+  deflens_raw context(context_lens, item_lens) do
+    fn data, fun ->
+      {results, changed} = get_and_map(context_lens, data, fn(context) ->
+        get_and_map(item_lens, context, fn(item) -> fun.({context, item}) end)
+      end)
+      {Enum.concat(results), changed}
+    end
+  end
+
   @doc ~S"""
   Returns a lens that focuses on what all of the supplied lenses focus on.
 
