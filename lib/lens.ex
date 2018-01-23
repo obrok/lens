@@ -386,6 +386,7 @@ defmodule Lens do
       ...> end)
       %{a: %{b: [3, 4]}, c: %{b: [4]}}
   """
+  @spec context(t, t) :: t
   deflens_raw context(context_lens, item_lens) do
     fn data, fun ->
       {results, changed} = get_and_map(context_lens, data, fn(context) ->
