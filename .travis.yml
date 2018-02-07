@@ -15,15 +15,15 @@ matrix:
       elixir: 1.5
     - otp_release: 20.0
       elixir: 1.6
-      env: FORMAT=true
+      env: STRICT=true
 env:
   global:
     - MIX_HOME=$(pwd)/.mix
 script:
-  - mix compile --warnings-as-errors
+  - if [ "${STRICT}" = "true" ]; then mix compile --warnings-as-errors; fi
   - mix test
   - mix dialyze
-  - if [ "${FORMAT}" = "true" ]; then mix format --check-formatted; fi
+  - if [ "${STRICT}" = "true" ]; then mix format --check-formatted; fi
 cache:
   directories:
   - .mix
