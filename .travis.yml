@@ -22,6 +22,7 @@ script:
   - mix compile --warnings-as-errors
   - mix test
   - mix dialyze
+  - mix format --check-formatted
 cache:
   directories:
   - .mix
