@@ -91,7 +91,9 @@ defmodule Lens do
   An alias for `at`.
   """
   @spec index(non_neg_integer) :: t
-  deflens index(index), do: at(index)
+  deflens index(index) do
+    at(index)
+  end
 
   @doc ~S"""
   Returns a lens that focuses on all of the supplied indices.
@@ -102,8 +104,9 @@ defmodule Lens do
       [2, 2, 4]
   """
   @spec indices([non_neg_integer]) :: t
-  deflens indices(indices), do:
+  deflens indices(indices) do
     indices |> Enum.map(&index/1) |> multiple
+  end
 
   @doc ~S"""
   Returns a lens that focuses between a given index and the previous one in a list. It will always return a nil when
@@ -151,7 +154,9 @@ defmodule Lens do
       [:d, :a, :b, :c]
   """
   @spec front :: t
-  deflens front, do: before(0)
+  deflens front do
+    before(0)
+  end
 
   @doc ~S"""
   Returns a lens that focuses after the last element of a list. It will always return a nil when accessing, but can
@@ -165,7 +170,7 @@ defmodule Lens do
   @spec back :: t
   deflens_raw back do
     fn data, fun ->
-      data |> Enum.count |> behind |> get_and_map(data, fun)
+      data |> Enum.count() |> behind |> get_and_map(data, fun)
     end
   end
 
@@ -224,7 +229,9 @@ defmodule Lens do
   deflens_raw key?(key) do
     fn data, fun ->
       case fetch_at_key(data, key) do
-        :error -> {[], data}
+        :error ->
+          {[], data}
+
         {:ok, value} ->
           {res, updated} = fun.(value)
           {[res], set_at_key(data, key, updated)}
@@ -246,8 +253,9 @@ defmodule Lens do
       %{a: 1, b: 2, c: 3}
   """
   @spec keys(nonempty_list(any)) :: t
-  deflens keys(keys), do:
+  deflens keys(keys) do
     keys |> Enum.map(&Lens.key/1) |> multiple
+  end
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, an error is raised.
@@ -260,8 +268,9 @@ defmodule Lens do
       ** (KeyError) key :c not found in: %{a: 1, b: 2}
   """
   @spec keys!(nonempty_list(any)) :: t
-  deflens keys!(keys), do:
+  deflens keys!(keys) do
     keys |> Enum.map(&Lens.key!/1) |> multiple
+  end
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, it is ignored.
@@ -274,8 +283,9 @@ defmodule Lens do
       [1]
   """
   @spec keys?(nonempty_list(any)) :: t
-  deflens keys?(keys), do:
+  deflens keys?(keys) do
     keys |> Enum.map(&Lens.key?/1) |> multiple
+  end
 
   @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
@@ -293,10 +303,12 @@ defmodule Lens do
   @spec all :: t
   deflens_raw all do
     fn data, fun ->
-      {res, updated} = Enum.reduce(data, {[], []}, fn item, {res, updated} ->
-        {res_item, updated_item} = fun.(item)
-        {[res_item | res], [updated_item | updated]}
-      end)
+      {res, updated} =
+        Enum.reduce(data, {[], []}, fn item, {res, updated} ->
+          {res_item, updated_item} = fun.(item)
+          {[res_item | res], [updated_item | updated]}
+        end)
+
       {Enum.reverse(res), Enum.reverse(updated)}
     end
   end
@@ -315,9 +327,11 @@ defmodule Lens do
   @spec seq(t, t) :: t
   deflens_raw seq(lens1, lens2) do
     fn data, fun ->
-      {res, changed} = get_and_map(lens1, data, fn item ->
-        get_and_map(lens2, item, fun)
-      end)
+      {res, changed} =
+        get_and_map(lens1, data, fn item ->
+          get_and_map(lens2, item, fun)
+        end)
+
       {Enum.concat(res), changed}
     end
   end
@@ -329,7 +343,9 @@ defmodule Lens do
       [:c, %{b: :c}]
   """
   @spec seq_both(t, t) :: t
-  deflens seq_both(lens1, lens2), do: both(seq(lens1, lens2), lens1)
+  deflens seq_both(lens1, lens2) do
+    both(seq(lens1, lens2), lens1)
+  end
 
   @doc ~S"""
   Make a lens recursive
@@ -346,7 +362,9 @@ defmodule Lens do
       [1, 3, 2]
   """
   @spec recur(t) :: t
-  deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
+  deflens_raw recur(lens) do
+    &do_recur(lens, &1, &2)
+  end
 
   @doc ~s"""
   Returns a lens that focuses on what both the lenses focus on.
@@ -389,9 +407,11 @@ defmodule Lens do
   @spec context(t, t) :: t
   deflens_raw context(context_lens, item_lens) do
     fn data, fun ->
-      {results, changed} = get_and_map(context_lens, data, fn(context) ->
-        get_and_map(item_lens, context, fn(item) -> fun.({context, item}) end)
-      end)
+      {results, changed} =
+        get_and_map(context_lens, data, fn context ->
+          get_and_map(item_lens, context, fn item -> fun.({context, item}) end)
+        end)
+
       {Enum.concat(results), changed}
     end
   end
@@ -403,8 +423,9 @@ defmodule Lens do
       [1, 2, %{a: 1, b: 2}]
   """
   @spec multiple([t]) :: t
-  deflens multiple(lenses), do:
-    lenses |> Enum.reverse |> Enum.reduce(empty(), &both/2)
+  deflens multiple(lenses) do
+    lenses |> Enum.reverse() |> Enum.reduce(empty(), &both/2)
+  end
 
   @doc ~S"""
   Returns a lens that does not change the focus of of the given lens, but puts the results into the given collectable
@@ -429,14 +450,16 @@ defmodule Lens do
   @spec filter(t, (any -> boolean)) :: t
   deflens_raw filter(lens, filter_fun) do
     fn data, fun ->
-      {res, changed} = get_and_map(lens, data, fn item ->
-        if filter_fun.(item) do
-          {res, changed} = fun.(item)
-          {[res], changed}
-        else
-          {[], item}
-        end
-      end)
+      {res, changed} =
+        get_and_map(lens, data, fn item ->
+          if filter_fun.(item) do
+            {res, changed} = fun.(item)
+            {[res], changed}
+          else
+            {[], item}
+          end
+        end)
+
       {Enum.concat(res), changed}
     end
   end
@@ -454,7 +477,7 @@ defmodule Lens do
       [2, 4]
   """
   @spec reject(t, (any -> boolean)) :: t
-  def reject(lens, filter_fun), do: filter(lens, & not filter_fun.(&1))
+  def reject(lens, filter_fun), do: filter(lens, &(not filter_fun.(&1)))
 
   @doc ~S"""
   Returns a lens that focuses on all values of a map.
@@ -465,7 +488,9 @@ defmodule Lens do
       %{a: 2, b: 3}
   """
   @spec map_values :: t
-  deflens map_values, do: all() |> into(%{}) |> at(1)
+  deflens map_values do
+    all() |> into(%{}) |> at(1)
+  end
 
   @doc ~S"""
   Returns a lens that focuses on all keys of a map.
@@ -476,7 +501,9 @@ defmodule Lens do
       %{2 => :a, 3 => :b}
   """
   @spec map_keys :: t
-  deflens map_keys, do: all() |> into(%{}) |> at(0)
+  deflens map_keys do
+    all() |> into(%{}) |> at(0)
+  end
 
   @doc ~S"""
   Returns a list of values that the lens focuses on in the given data.
@@ -534,11 +561,12 @@ defmodule Lens do
   end
 
   defp do_recur(lens, data, fun) do
-    {res, changed} = get_and_map(lens, data, fn item ->
-      {results, changed1} = do_recur(lens, item, fun)
-      {res_parent, changed2} = fun.(changed1)
-      {results ++ [res_parent], changed2}
-    end)
+    {res, changed} =
+      get_and_map(lens, data, fn item ->
+        {results, changed1} = do_recur(lens, item, fun)
+        {res_parent, changed2} = fun.(changed1)
+        {results ++ [res_parent], changed2}
+      end)
 
     {Enum.concat(res), changed}
   end
@@ -551,6 +579,7 @@ defmodule Lens do
   end
 
   defp set_at_key(data, key, value) when is_map(data), do: Map.put(data, key, value)
+
   defp set_at_key(data, key, value) do
     {_, updated} = Access.get_and_update(data, key, fn _ -> {nil, value} end)
     updated
@@ -570,6 +599,7 @@ defmodule Lens do
   defp get_at_index(data, index), do: Enum.at(data, index)
 
   defp set_at_index(data, index, value) when is_tuple(data), do: put_elem(data, index, value)
+
   defp set_at_index(data, index, value) when is_list(data) do
     List.update_at(data, index, fn _ -> value end)
   end
