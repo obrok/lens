@@ -442,6 +442,7 @@ defmodule Lens do
   end
 
   @doc false
+  @deprecated "Use filter/2 instead"
   @spec satisfy(t, (any -> boolean)) :: t
   def satisfy(lens, filter_fun), do: filter(lens, filter_fun)
 
