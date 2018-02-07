@@ -15,6 +15,7 @@ matrix:
       elixir: 1.5
     - otp_release: 20.0
       elixir: 1.6
+      env: FORMAT=true
 env:
   global:
     - MIX_HOME=$(pwd)/.mix
@@ -22,7 +23,7 @@ script:
   - mix compile --warnings-as-errors
   - mix test
   - mix dialyze
-  - mix format --check-formatted
+  - if [ "${FORMAT}" = "true" ]; then mix format --check-formatted; fi
 cache:
   directories:
   - .mix
