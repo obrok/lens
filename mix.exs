@@ -6,12 +6,12 @@ defmodule Lens.Mixfile do
       app: :lens,
       version: "0.6.0",
       elixir: "~> 1.3",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: description(),
       package: package(),
-      docs: docs(),
+      docs: docs()
     ]
   end
 
@@ -46,14 +46,14 @@ defmodule Lens.Mixfile do
     [
       licenses: ["MIT"],
       maintainers: ["Paweł Obrok"],
-      links: %{"GitHub" => "https://github.com/obrok/lens"},
+      links: %{"GitHub" => "https://github.com/obrok/lens"}
     ]
   end
 
   defp docs do
     [
       main: "readme",
-      extras: ["README.md"],
+      extras: ["README.md"]
     ]
   end
 end
