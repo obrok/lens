@@ -17,10 +17,11 @@ defmodule Lens.Macros do
       def some_lens(previous, foo, bar), do: Lens.seq(previous, some_lens_combination(foo, bar))
   """
   defmacro deflens(header = {name, _, args}, do: body) do
-    args = case args do
-      nil -> []
-      _ -> args
-    end
+    args =
+      case args do
+        nil -> []
+        _ -> args
+      end
 
     quote do
       def unquote(header), do: unquote(body)
@@ -36,10 +37,11 @@ defmodule Lens.Macros do
   Same as `deflens` but creates private functions instead.
   """
   defmacro deflensp(header = {name, _, args}, do: body) do
-    args = case args do
-      nil -> []
-      _ -> args
-    end
+    args =
+      case args do
+        nil -> []
+        _ -> args
+      end
 
     quote do
       defp unquote(header), do: unquote(body)
@@ -53,18 +55,21 @@ defmodule Lens.Macros do
 
   @doc false
   defmacro deflens_raw(header = {name, _, args}, do: body) do
-    args = case args do
-      nil -> []
-      _ -> args
-    end
+    args =
+      case args do
+        nil -> []
+        _ -> args
+      end
 
     quote do
       def unquote(header) do
         lens = unquote(body)
+
         fn
           :get, data, next ->
             {list, _} = lens.(data, &{&1, &1})
             next.(list)
+
           :get_and_update, data, mapper ->
             lens.(data, mapper)
         end
