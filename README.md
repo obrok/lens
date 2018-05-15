@@ -53,7 +53,7 @@ lens = Lens.both(
   Lens.recur(Lens.seq(Lens.key(:subwidgets), Lens.all))
 )
 |> Lens.seq(Lens.key(:size))
-|> Lens.satisfy(&(&1 > 100))
+|> Lens.filter(&(&1 > 100))
 ```
 
 Given that we can:
