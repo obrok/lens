@@ -1,3 +1,6 @@
+Unreleased
++ Add Lens.either as fallback for empty lens and upsert behaviour
+
 0.6.0
 - Remove get as it was easy to create bugs with it
 + Add Lens.one! to both fetch a single element and assert that there is only one
