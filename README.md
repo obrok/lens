@@ -1,6 +1,7 @@
 # Lens
 
 [![Build Status](https://travis-ci.org/obrok/lens.png?branch=master)](https://travis-ci.org/obrok/lens)
+[![Hex.pm](http://img.shields.io/hexpm/v/lens.svg)](https://hex.pm/packages/lens) [![Hex.pm](http://img.shields.io/hexpm/dt/lens.svg)](https://hex.pm/packages/lens)
 
 A utility for working with nested data structures. Take a look at
 [Nested data structures with functional lenses](https://yapee.svbtle.com/nested-data-structures-with-lens)
