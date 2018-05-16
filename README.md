@@ -5,7 +5,8 @@
 
 A utility for working with nested data structures. Take a look at
 [Nested data structures with functional lenses](https://yapee.svbtle.com/nested-data-structures-with-lens)
-for a gentler introduction.
+for a gentler introduction. Note that the blogpost was written using version `0.3.1` and there have been some API
+changes since then - see [Migration](#migration) for details.
 
 ## Installation
 
@@ -19,12 +20,20 @@ def deps do
 end
 ```
 
-## Migration from pre-0.6.0
+## Migration
+
+### From pre-0.6.0
 
 In 0.6.0 the function `Lens.get` got removed. The reason was that it was very easy to create a bug where a list was
 treated as a single element or vice-versa. Wherever you used `Lens.get` you now should either use `Lens.one!` if the
 invocation should always return exactly one element (this will crash if there is any other number of elements) or
 `Lens.to_list` and match on the result if you want to behave differently for different numbers of elements.
+
+### From pre-0.5.0
+
+In 0.5.0 the function `satisfy` got renamed to `filter` while the previous version of `filter` was removed. The reason
+was that with the new arrangement there is a matching pair of `filter`/`reject` functions, and this should be more
+intuitive. Whererver you used `Lens.filter(predicate)` you can now use `Lens.filter(Lens.all(), predicate)`.
 
 ## Example
 

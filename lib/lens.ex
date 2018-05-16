@@ -393,7 +393,7 @@ defmodule Lens do
 
   @doc """
   Combines the two provided lenses in a way similar to `seq`. However instead of only focusing on what the final lens
-  would focus on it focuses on pairs of the form `{context, part}`, where context is the focus of the first lens in
+  would focus on, it focuses on pairs of the form `{context, part}`, where context is the focus of the first lens in
   which the focus of the second lens was found.
 
       iex> lens = Lens.context(Lens.keys([:a, :c]), Lens.key(:b) |> Lens.all())
