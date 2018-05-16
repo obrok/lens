@@ -428,22 +428,22 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Returns a lens that focuses on what the first lens focuses, unless its nothing. In that case the
-  the lens will focus on what the second lens focuses on.
+  Returns a lens that focuses on what the first lens focuses on, unless it's nothing. In that case the
+  lens will focus on what the second lens focuses on.
 
       iex(1)> get_in(%{a: 1}, [Lens.either(Lens.key?(:a), Lens.key?(:b))])
       [1]
       iex(2)> get_in(%{b: 2}, [Lens.either(Lens.key?(:a), Lens.key?(:b))])
       [2]
 
-  Or a more complex examples:
+  It can be used to return a default value:
 
       iex> get_in([%{id: 8}], [Lens.all |> Lens.filter(&(&1.id == 8)) |> Lens.either(Lens.const(:default))])
       [%{id: 8}]
       iex> get_in([%{id: 8}], [Lens.all |> Lens.filter(&(&1.id == 1)) |> Lens.either(Lens.const(:default))])
       [:default]
 
-  This is useful for inserting or updating values.
+  Or to upsert:
 
       iex> upsert = Lens.all() |> Lens.filter(&(&1[:id] == 1)) |> Lens.either(Lens.front())
       iex> update_in([%{id: 0}, %{id: 1}], [upsert], fn _ -> %{id: 1, x: :y} end)
