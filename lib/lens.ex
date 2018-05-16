@@ -428,6 +428,47 @@ defmodule Lens do
   end
 
   @doc ~S"""
+  Returns a lens that focuses on what the first lens focuses, unless its nothing. In that case the
+  the lens will focus on what the second lens focuses on.
+
+      iex(1)> get_in(%{a: 1}, [Lens.either(Lens.key?(:a), Lens.key?(:b))])
+      [1]
+      iex(2)> get_in(%{b: 2}, [Lens.either(Lens.key?(:a), Lens.key?(:b))])
+      [2]
+
+  Or a more complex examples:
+
+      iex> get_in([%{id: 8}], [Lens.all |> Lens.filter(&(&1.id == 8)) |> Lens.either(Lens.const(:default))])
+      [%{id: 8}]
+      iex> get_in([%{id: 8}], [Lens.all |> Lens.filter(&(&1.id == 1)) |> Lens.either(Lens.const(:default))])
+      [:default]
+
+  This is useful for inserting or updating values.
+
+      iex> upsert = Lens.all() |> Lens.filter(&(&1[:id] == 1)) |> Lens.either(Lens.front())
+      iex> update_in([%{id: 0}, %{id: 1}], [upsert], fn _ -> %{id: 1, x: :y} end)
+      [%{id: 0}, %{id: 1, x: :y}]
+      iex> update_in([%{id: 0}, %{id: 2}], [upsert], fn _ -> %{id: 1, x: :y} end)
+      [%{id: 1, x: :y}, %{id: 0}, %{id: 2}]
+  """
+  @spec either(t, t) :: t
+  deflens_raw either(lens, other_lens) do
+    fn data, fun ->
+      {res, changed} =
+        case get_and_map(lens, data, fun) do
+          {[], _updated} ->
+            {res, updated} = get_and_map(other_lens, data, fun)
+            {res, updated}
+
+          {res, updated} ->
+            {res, updated}
+        end
+
+      {res, changed}
+    end
+  end
+
+  @doc ~S"""
   Returns a lens that does not change the focus of of the given lens, but puts the results into the given collectable
   when updating.
 

@@ -37,6 +37,27 @@ defmodule LensTest do
     end
   end
 
+  describe "either" do
+    test "to_list" do
+      lens = Lens.empty() |> Lens.either(Lens.const(:none))
+
+      assert Lens.to_list(lens, [:a, :b]) == [:none]
+
+      lens = Lens.either(Lens.indices([0, 2]), Lens.back())
+
+      assert Lens.to_list(lens, [2, 3, 4]) == [2, 4]
+    end
+
+    test "map" do
+      data = [%{id: 0}, %{id: 1}]
+      upsert = Lens.all() |> Lens.filter(&(&1[:id] == 2)) |> Lens.either(Lens.front())
+      assert update_in(data, [upsert], fn _ -> %{id: 2} end) == [%{id: 2}, %{id: 0}, %{id: 1}]
+
+      upsert = Lens.all() |> Lens.filter(&(&1[:id] == 1)) |> Lens.either(Lens.front())
+      assert update_in(data, [upsert], fn x -> Map.put(x, :name, "new") end) == [%{id: 0}, %{id: 1, name: "new"}]
+    end
+  end
+
   describe "all" do
     test "to_list", do: assert(Lens.to_list(Lens.all(), [:a, :b, :c]) == [:a, :b, :c])
 
