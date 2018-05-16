@@ -454,17 +454,10 @@ defmodule Lens do
   @spec either(t, t) :: t
   deflens_raw either(lens, other_lens) do
     fn data, fun ->
-      {res, changed} =
-        case get_and_map(lens, data, fun) do
-          {[], _updated} ->
-            {res, updated} = get_and_map(other_lens, data, fun)
-            {res, updated}
-
-          {res, updated} ->
-            {res, updated}
-        end
-
-      {res, changed}
+      case get_and_map(lens, data, fun) do
+        {[], _updated} -> get_and_map(other_lens, data, fun)
+        {res, updated} -> {res, updated}
+      end
     end
   end
 
