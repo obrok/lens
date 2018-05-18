@@ -1,4 +1,4 @@
-Unreleased
+0.7.0
 + Add Lens.either as fallback for empty lens and upsert behaviour
 
 0.6.0
