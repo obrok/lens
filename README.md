@@ -6,7 +6,7 @@
 A utility for working with nested data structures. Take a look at
 [Nested data structures with functional lenses](https://yapee.svbtle.com/nested-data-structures-with-lens)
 for a gentler introduction. Note that the blogpost was written using version `0.3.1` and there have been some API
-changes since then - see [Migration](#migration) for details.
+changes since then - see [Upgrading](#upgrading) for details.
 
 ## Installation
 
@@ -20,7 +20,7 @@ def deps do
 end
 ```
 
-## Migration
+## Upgrading
 
 ### From pre-0.6.0
 
