@@ -572,6 +572,16 @@ defmodule Lens do
   def map(lens, data, fun), do: update_in(data, [lens], fun)
 
   @doc ~S"""
+  Returns an updated version of the data by replacing each spot the lens focuses on with the given value.
+
+      iex> data = [1, 2, 3, 4]
+      iex> Lens.all() |> Lens.filter(&Integer.is_odd/1) |> Lens.put(data, 0)
+      [0, 2, 0, 4]
+  """
+  @spec put(t, any, any) :: any
+  def put(lens, data, value), do: put_in(data, [lens], value)
+
+  @doc ~S"""
   Returns an updated version of the data and a transformed value from each location the lens focuses on. The
   transformation function must return a tuple `{value_to_return, value_to_update}`.
 

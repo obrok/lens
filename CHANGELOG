@@ -1,3 +1,7 @@
+Unreleased
+
++ Add Lens.put as Lens-first alternative to Kernel.put_in
+
 0.7.0
 + Add Lens.either as fallback for empty lens and upsert behaviour
 
