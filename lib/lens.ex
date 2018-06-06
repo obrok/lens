@@ -348,18 +348,35 @@ defmodule Lens do
   end
 
   @doc ~S"""
-  Make a lens recursive
+  Given a lens L this creates a lens that applies L, then applies L to the results of that application and so on,
+  focusing on all the results encountered on the way.
 
       iex> data = %{
       ...>    items: [
-      ...>      %{v: 1, items: []},
-      ...>      %{v: 2, items: [
-      ...>        %{v: 3, items: []}
+      ...>      %{id: 1, items: []},
+      ...>      %{id: 2, items: [
+      ...>        %{id: 3, items: []}
       ...>      ]}
       ...> ]}
-      iex> lens = Lens.recur(Lens.key(:items) |> Lens.all) |> Lens.key(:v)
+      iex> lens = Lens.recur(Lens.key(:items) |> Lens.all) |> Lens.key(:id)
       iex> Lens.to_list(lens, data)
       [1, 3, 2]
+
+  Note that it does not focus on the root item. You can remedy that with `Lens.root`:
+
+
+      iex> data = %{
+      ...>    id: 4,
+      ...>    items: [
+      ...>      %{id: 1, items: []},
+      ...>      %{id: 2, items: [
+      ...>        %{id: 3, items: []}
+      ...>      ]}
+      ...>    ]
+      ...> }
+      iex> lens = Lens.both(Lens.recur(Lens.key(:items) |> Lens.all), Lens.root) |> Lens.key(:id)
+      iex> Lens.to_list(lens, data)
+      [1, 3, 2, 4]
   """
   @spec recur(t) :: t
   deflens_raw recur(lens) do
