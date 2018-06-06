@@ -499,11 +499,13 @@ defmodule Lens do
       [1, 3]
   """
   @spec filter(t, (any -> boolean)) :: t
-  deflens_raw filter(lens, filter_fun) do
+  def filter(predicate), do: Lens.root() |> filter(predicate)
+
+  deflens_raw filter(lens, predicate) do
     fn data, fun ->
       {res, changed} =
         get_and_map(lens, data, fn item ->
-          if filter_fun.(item) do
+          if predicate.(item) do
             {res, changed} = fun.(item)
             {[res], changed}
           else
@@ -518,7 +520,7 @@ defmodule Lens do
   @doc false
   @deprecated "Use filter/2 instead"
   @spec satisfy(t, (any -> boolean)) :: t
-  def satisfy(lens, filter_fun), do: filter(lens, filter_fun)
+  def satisfy(lens, predicate), do: filter(lens, predicate)
 
   @doc ~S"""
   Returns a lens that focuses on a subset of elements focused on by the given lens that don't satisfy the given
@@ -528,7 +530,7 @@ defmodule Lens do
       [2, 4]
   """
   @spec reject(t, (any -> boolean)) :: t
-  def reject(lens, filter_fun), do: filter(lens, &(not filter_fun.(&1)))
+  def reject(lens, predicate), do: filter(lens, &(not predicate.(&1)))
 
   @doc ~S"""
   Returns a lens that focuses on all values of a map.

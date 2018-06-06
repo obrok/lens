@@ -1,6 +1,7 @@
 defmodule LensTest do
   use ExUnit.Case
   require Integer
+  import Lens.Macros
   doctest Lens
 
   defmodule TestStruct do
@@ -106,6 +107,15 @@ defmodule LensTest do
 
       assert Lens.get_and_map(lens, %{a: 1, b: 2, c: [3, 4]}, fn x -> {x, x + 1} end) ==
                {[1, 3], %{a: 2, b: 2, c: [4, 4]}}
+    end
+
+    test "usage with deflens" do
+      assert Lens.get_and_map(Lens.all() |> test_filter(), [1, 2, 3, 4], fn x -> {x, x + 1} end) ==
+               {[1, 3], [2, 2, 4, 4]}
+    end
+
+    deflensp test_filter() do
+      Lens.filter(&Integer.is_odd/1)
     end
   end
 
