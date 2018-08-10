@@ -1,4 +1,4 @@
-Unreleased
+0.8.0
 
 + Add Lens.put as Lens-first alternative to Kernel.put_in
 + Add Lens.filter/1 for defining aliases for filters with deflens
