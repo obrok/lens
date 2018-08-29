@@ -57,12 +57,10 @@ We can construct a `Lens` object that describes these locations in the datastruc
 ```elixir
 lens = Lens.both(
   Lens.key(:main_widget),
-  Lens.seq(Lens.key(:other_widgets), Lens.all)
+  Lens.key(:other_widgets) |> Lens.all
 )
-|> Lens.seq_both(
-  Lens.recur(Lens.seq(Lens.key(:subwidgets), Lens.all))
-)
-|> Lens.seq(Lens.key(:size))
+|> Lens.seq_both(Lens.recur(Lens.key(:subwidgets) |> Lens.all))
+|> Lens.key(:size)
 |> Lens.filter(&(&1 > 100))
 ```
 
