@@ -12,9 +12,7 @@ defmodule Lens do
       1
   """
   @spec empty :: t
-  deflens_raw empty do
-    fn data, _fun -> {[], data} end
-  end
+  deflens_raw empty, do: fn data, _fun -> {[], data} end
 
   @doc ~S"""
   Returns a lens that ignores the data and always focuses on the given value.
@@ -91,9 +89,7 @@ defmodule Lens do
   An alias for `at`.
   """
   @spec index(non_neg_integer) :: t
-  deflens index(index) do
-    at(index)
-  end
+  deflens index(index), do: at(index)
 
   @doc ~S"""
   Returns a lens that focuses on all of the supplied indices.
@@ -104,9 +100,7 @@ defmodule Lens do
       [2, 2, 4]
   """
   @spec indices([non_neg_integer]) :: t
-  deflens indices(indices) do
-    indices |> Enum.map(&index/1) |> multiple
-  end
+  deflens indices(indices), do: indices |> Enum.map(&index/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses between a given index and the previous one in a list. It will always return a nil when
@@ -154,9 +148,7 @@ defmodule Lens do
       [:d, :a, :b, :c]
   """
   @spec front :: t
-  deflens front do
-    before(0)
-  end
+  deflens front, do: before(0)
 
   @doc ~S"""
   Returns a lens that focuses after the last element of a list. It will always return a nil when accessing, but can
@@ -253,9 +245,7 @@ defmodule Lens do
       %{a: 1, b: 2, c: 3}
   """
   @spec keys(nonempty_list(any)) :: t
-  deflens keys(keys) do
-    keys |> Enum.map(&Lens.key/1) |> multiple
-  end
+  deflens keys(keys), do: keys |> Enum.map(&Lens.key/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, an error is raised.
@@ -268,9 +258,7 @@ defmodule Lens do
       ** (KeyError) key :c not found in: %{a: 1, b: 2}
   """
   @spec keys!(nonempty_list(any)) :: t
-  deflens keys!(keys) do
-    keys |> Enum.map(&Lens.key!/1) |> multiple
-  end
+  deflens keys!(keys), do: keys |> Enum.map(&Lens.key!/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on the values of all the keys. If any of the keys does not exist, it is ignored.
@@ -283,9 +271,7 @@ defmodule Lens do
       [1]
   """
   @spec keys?(nonempty_list(any)) :: t
-  deflens keys?(keys) do
-    keys |> Enum.map(&Lens.key?/1) |> multiple
-  end
+  deflens keys?(keys), do: keys |> Enum.map(&Lens.key?/1) |> multiple
 
   @doc ~S"""
   Returns a lens that focuses on all the values in an enumerable.
@@ -343,9 +329,7 @@ defmodule Lens do
       [:c, %{b: :c}]
   """
   @spec seq_both(t, t) :: t
-  deflens seq_both(lens1, lens2) do
-    both(seq(lens1, lens2), lens1)
-  end
+  deflens seq_both(lens1, lens2), do: both(seq(lens1, lens2), lens1)
 
   @doc ~S"""
   Given a lens L this creates a lens that applies L, then applies L to the results of that application and so on,
@@ -379,9 +363,7 @@ defmodule Lens do
       [1, 3, 2, 4]
   """
   @spec recur(t) :: t
-  deflens_raw recur(lens) do
-    &do_recur(lens, &1, &2)
-  end
+  deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
   @doc ~s"""
   Returns a lens that focuses on what both the lenses focus on.
@@ -440,9 +422,7 @@ defmodule Lens do
       [1, 2, %{a: 1, b: 2}]
   """
   @spec multiple([t]) :: t
-  deflens multiple(lenses) do
-    lenses |> Enum.reverse() |> Enum.reduce(empty(), &both/2)
-  end
+  deflens multiple(lenses), do: lenses |> Enum.reverse() |> Enum.reduce(empty(), &both/2)
 
   @doc ~S"""
   Returns a lens that focuses on what the first lens focuses on, unless it's nothing. In that case the
@@ -541,9 +521,7 @@ defmodule Lens do
       %{a: 2, b: 3}
   """
   @spec map_values :: t
-  deflens map_values do
-    all() |> into(%{}) |> at(1)
-  end
+  deflens map_values, do: all() |> into(%{}) |> at(1)
 
   @doc ~S"""
   Returns a lens that focuses on all keys of a map.
@@ -554,9 +532,7 @@ defmodule Lens do
       %{2 => :a, 3 => :b}
   """
   @spec map_keys :: t
-  deflens map_keys do
-    all() |> into(%{}) |> at(0)
-  end
+  deflens map_keys, do: all() |> into(%{}) |> at(0)
 
   @doc ~S"""
   Returns a list of values that the lens focuses on in the given data.
