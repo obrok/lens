@@ -1,3 +1,7 @@
+0.9.0
+~ Elixir requirement set to 1.5
++ Lens now exports formatter settings to make deflens(p) behave like def(p)
+
 0.8.0
 
 + Add Lens.put as Lens-first alternative to Kernel.put_in
