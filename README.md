@@ -104,3 +104,28 @@ iex> update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -
 iex> get_and_update_in([1, 2, 3], [Lens.all() |> Lens.filter(&Integer.is_odd/1)], fn x -> {x - 1, x + 1} end)
 {[0, 2], [2, 2, 4]}
 ```
+
+## Formatting
+
+Normally, `mix format` will change definitions like:
+
+```elixir
+deflens a_lens(), do: some() |> implementation()
+deflensp a_private_lens(), do: some() |> implementation()
+```
+
+into:
+
+```elixir
+deflens(a_lens(), do: some() |> implementation())
+deflensp(a_private_lens(), do: some() |> implementation())
+```
+
+To avoid this, you can import lens's formatter settings in your `formatter.exs`:
+
+```elixir
+# my_app/.formatter.exs
+[
+  import_deps: [:lens]
+]
+```
