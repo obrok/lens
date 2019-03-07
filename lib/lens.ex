@@ -365,6 +365,15 @@ defmodule Lens do
   @spec recur(t) :: t
   deflens_raw recur(lens), do: &do_recur(lens, &1, &2)
 
+  @doc ~S"""
+  Just like `recur` but also focuses on the root of the data.
+
+      iex> data = {:x, [{:y, []}, {:z, [{:w, []}]}]}
+      iex> Lens.recur_root(Lens.at(1) |> Lens.all()) |> Lens.at(0) |> Lens.to_list(data)
+      [:y, :w, :z, :x]
+  """
+  deflens recur_root(lens), do: Lens.both(Lens.recur(lens), Lens.root())
+
   @doc ~s"""
   Returns a lens that focuses on what both the lenses focus on.
 
