@@ -1,5 +1,6 @@
 Unreleased
 + Lens.recur_root for recursive lenses that also focus on the to item
+~ Fix missing typespec on Lens.into
 
 0.9.0
 ~ Elixir requirement set to 1.5
