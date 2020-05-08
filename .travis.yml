@@ -11,7 +11,10 @@ matrix:
       elixir: 1.7
     - otp_release: 22.0
       elixir: 1.9
+    - otp_release: 22.2
+      elixir: 1.10
       env: STRICT=true
+
 env:
   global:
     - MIX_HOME=$(pwd)/.mix
