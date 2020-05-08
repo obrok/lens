@@ -486,7 +486,7 @@ defmodule Lens do
       ...>   Lens.map(%{key1: %{key2: :value}}, fn {k, v} -> {v, k} end)
       %{key1: %{value: :key2}}
   """
-  @spec into(t, Collectable.t) :: t
+  @spec into(t, Collectable.t()) :: t
   deflens_raw into(lens, collectable) do
     fn data, fun ->
       {res, updated} = get_and_map(lens, data, fun)
