@@ -471,8 +471,20 @@ defmodule Lens do
   Returns a lens that does not change the focus of of the given lens, but puts the results into the given collectable
   when updating.
 
-      iex> Lens.all |> Lens.into(MapSet.new) |> Lens.map(MapSet.new([-2, -1, 1, 2]), &(&1 * &1))
+      iex> Lens.into(Lens.all(), MapSet.new) |> Lens.map(MapSet.new([-2, -1, 1, 2]), &(&1 * &1))
       MapSet.new([1, 4])
+
+  Notice that collectable composes in a somewhat surprising way, for example:
+
+      iex> Lens.map_values() |> Lens.all() |> Lens.into(%{}) |>
+      ...>   Lens.map(%{key1: %{key2: :value}}, fn {k, v} -> {v, k} end)
+      %{key1: [{:value, :key2}]}
+
+  To prevent this, avoid using `|>` with `into`:
+
+      iex> Lens.map_values() |> Lens.into(Lens.all(), %{}) |>
+      ...>   Lens.map(%{key1: %{key2: :value}}, fn {k, v} -> {v, k} end)
+      %{key1: %{value: :key2}}
   """
   deflens_raw into(lens, collectable) do
     fn data, fun ->
