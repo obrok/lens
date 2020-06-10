@@ -15,7 +15,7 @@ The package can be installed by adding `lens` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:lens, "~> 0.9.0"}
+    {:lens, "~> 1.0.0"}
   ]
 end
 ```

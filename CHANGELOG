@@ -1,4 +1,4 @@
-Unreleased
+1.0.0
 + Lens.recur_root for recursive lenses that also focus on the to item
 ~ Fix missing typespec on Lens.into
 
