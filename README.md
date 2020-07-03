@@ -33,7 +33,7 @@ invocation should always return exactly one element (this will crash if there is
 
 In 0.5.0 the function `satisfy` got renamed to `filter` while the previous version of `filter` was removed. The reason
 was that with the new arrangement there is a matching pair of `filter`/`reject` functions, and this should be more
-intuitive. Whererver you used `Lens.filter(predicate)` you can now use `Lens.filter(Lens.all(), predicate)`.
+intuitive. Wherever you used `Lens.filter(predicate)` you can now use `Lens.filter(Lens.all(), predicate)`.
 
 ## Example
 
