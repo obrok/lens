@@ -53,7 +53,8 @@ defmodule Lens.Mixfile do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md"]
+      extras: ["README.md"],
+      source_url_pattern: "https://github.com/obrok/lens/blob/master/%{path}#L%{line}"
     ]
   end
 end
