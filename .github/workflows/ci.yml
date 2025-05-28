@@ -1,0 +1,34 @@
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: 26.2.2
+          elixir-version: 1.18.3
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - run: mix format --check-formatted
+
+  test:
+    runs-on: ubuntu-24.04
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        include:
+          - otp: 26.2.2
+            elixir: 1.14.5
+          - otp: 26.2.2
+            elixir: 1.18.3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix test
