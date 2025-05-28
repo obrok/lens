@@ -497,7 +497,7 @@ defmodule Lens do
   @doc ~S"""
   Returns a lens that focuses on a subset of elements focused on by the given lens that satisfy the given condition.
 
-      iex> Lens.map_values() |> Lens.filter(&Integer.is_odd/1) |> Lens.to_list(%{a: 1, b: 2, c: 3, d: 4})
+      iex> Lens.map_values() |> Lens.filter(&Integer.is_odd/1) |> Lens.to_list(%{a: 1, b: 2, c: 3, d: 4}) |> Enum.sort()
       [1, 3]
   """
   @spec filter(t, (any -> boolean)) :: t
@@ -528,7 +528,7 @@ defmodule Lens do
   Returns a lens that focuses on a subset of elements focused on by the given lens that don't satisfy the given
   condition.
 
-      iex> Lens.map_values() |> Lens.reject(&Integer.is_odd/1) |> Lens.to_list(%{a: 1, b: 2, c: 3, d: 4})
+      iex> Lens.map_values() |> Lens.reject(&Integer.is_odd/1) |> Lens.to_list(%{a: 1, b: 2, c: 3, d: 4}) |> Enum.sort()
       [2, 4]
   """
   @spec reject(t, (any -> boolean)) :: t

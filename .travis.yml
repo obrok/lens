@@ -9,6 +9,8 @@ matrix:
       elixir: 1.9
     - otp_release: 22.2
       elixir: 1.10
+    - otp_release: 26.2
+      elixir: 1.18
       env: STRICT=true
 
 env:
